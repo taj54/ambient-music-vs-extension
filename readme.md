@@ -1,8 +1,11 @@
 # 🎵 Ambient Music AutoPlayer for VS Code
 
+
 > **Inspiration**  
 > One day, I realized I had been feeling unproductive for several days. After a quick self-reflection, I discovered that watching TV series and movies in the background while coding was draining my focus and creativity. This insight inspired me to build a tool for myself—and for thousands of other developers who face similar distractions—to help us stay in the zone with relaxing ambient music.
 
+
+**Version 1.0.0**
 
 Boost your focus and flow with ambient music that plays automatically when you open a project in Visual Studio Code.
 
