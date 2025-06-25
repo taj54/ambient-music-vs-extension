@@ -1,20 +1,38 @@
 {
     "name": "ambient-music-extension",
     "displayName": "Ambient Music AutoPlayer",
-    "description": "Auto-play lofi/ambient music when a VS Code project opens.",
-    "version": "0.0.1",
+    "description": "Auto-play ambient music when a VS Code project opens.",
+    "version": "0.0.2",
+    "publisher": "taj54dev",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/taj54/ambient-music-vs-extension.git"
+    },
     "engines": {
         "vscode": "^1.80.0"
     },
-    "activationEvents": [
-        "onStartupFinished"
-    ],
     "main": "./dist/extension.js",
+    "activationEvents": [
+        "onStartupFinished",
+        "workspaceContains:**/*"
+    ],
     "contributes": {
         "commands": [
             {
-                "command": "ambientMusic.start",
+                "command": "ambientMusic.open",
+                "title": "Open Ambient Music Panel"
+            },
+            {
+                "command": "ambientMusic.play",
                 "title": "Play Ambient Music"
+            },
+            {
+                "command": "ambientMusic.pause",
+                "title": "Pause Ambient Music"
+            },
+            {
+                "command": "ambientMusic.resume",
+                "title": "Resume Ambient Music"
             }
         ]
     },
@@ -24,8 +42,13 @@
         "watch": "tsc -watch -p ./"
     },
     "devDependencies": {
+        "@types/node": "^24.0.4",
         "@types/vscode": "^1.80.0",
+        "@types/ws": "^8.18.1",
         "typescript": "^5.0.0",
         "vsce": "^2.15.0"
+    },
+    "dependencies": {
+        "ws": "^8.18.2"
     }
 }

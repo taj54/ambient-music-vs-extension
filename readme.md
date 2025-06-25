@@ -1,4 +1,8 @@
-# 🎧 Ambient Music AutoPlayer (VS Code Extension)
+# 🎵 Ambient Music AutoPlayer for VS Code
+
+> **Inspiration**  
+> One day, I realized I had been feeling unproductive for several days. After a quick self-reflection, I discovered that watching TV series and movies in the background while coding was draining my focus and creativity. This insight inspired me to build a tool for myself—and for thousands of other developers who face similar distractions—to help us stay in the zone with relaxing ambient music.
+
 
 Boost your focus and flow with ambient music that plays automatically when you open a project in Visual Studio Code.
 
@@ -6,104 +10,78 @@ Boost your focus and flow with ambient music that plays automatically when you o
 
 ## ✨ Features
 
-- ✅ Auto-plays lofi/ambient music on project startup  
-- ✅ Manual command to toggle ambient music from Command Palette  
-- ✅ Friendly status notifications  
-- ✅ Lightweight and zero config
+- ✅ Auto-plays ambient music when you open a VS Code workspace
+- ✅ Run manually from the Command Palette anytime
+- ✅ Friendly notification on playback start
+- ✅ No setup or configuration required
 
 ---
 
-## 🚀 Getting Started
+## 🚀 How to Use
 
-### 1. Clone the Repo
-```bash
-git clone https://github.com/taj54/ambient-music-vs-extension.git
-cd ambient-music-extension
-```
+### Automatic Playback
 
-### 2. Install Dependencies
-```bash
-npm install
-```
+Once the extension is installed:
 
-### 3. Build the Extension
-```bash
-npm run compile
-```
+- Open any project folder in VS Code
+- A browser tab will open with relaxing ambient music
+- You’ll see a toast notification confirming it started
 
-### 4. Run in Development Mode
-Press `F5` in VS Code to open a new Extension Development Host.
+### Manual Playback
 
-You’ll see:
-- 🎶 Your lofi music opens in the browser
-- 🍅 A toast notification appears
+You can also trigger playback anytime:
+
+- Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac)
+- Search for `Ambient Music: Play Ambient Music`
+- Press Enter to play
 
 ---
 
-## 🧠 How It Works
+## 📁 Installation
 
-On activation (`onStartupFinished`), the extension opens a YouTube lofi stream in your browser:
+### Installation from Marketplace
+
+You can install it directly from the VS Code Marketplace:
+
+[**Ambient Music Extension – VS Code Marketplace**](https://marketplace.visualstudio.com/items?itemName=taj54dev.ambient-music-extension)
+
+---
+
+## 🎧 Custom Music (Advanced)
+
+You can ask a developer to change the music source by editing the extension's code in:
 
 ```ts
-const musicURL = vscode.Uri.parse("https://www.youtube.com/watch?v=jfKfPfyJRdk");
-vscode.env.openExternal(musicURL);
-```
-
-You can also run `Ambient Music: Play Ambient Music` from the Command Palette to trigger it manually.
-
----
-
-## 🛠 Configuration
-
-No configuration is required.  
-To use a **custom music link**, edit `src/extension.ts`:
-
-```ts
+// src/extension.ts
 const musicURL = vscode.Uri.parse("https://your.custom.url");
 ```
 
-Then recompile:
-```bash
-npm run compile
-```
+After changing the URL, the extension must be recompiled.
 
 ---
 
-## 📦 Packaging for Distribution
+## 🔗 Requirements
 
-Make sure `vsce` is installed:
-
-```bash
-npm install -g vsce
-```
-
-Then run:
-```bash
-vsce package
-```
-
-This will create a `.vsix` file you can install or share.
+- Visual Studio Code v1.80 or newer
+- Internet connection (for streaming)
 
 ---
 
-## 📌 Requirements
+## 🔖 Support
 
-- Node.js (v18 or newer recommended)
-- Visual Studio Code 1.80+
-- Internet connection to stream music
+Have suggestions or issues? Visit the [GitHub repo](https://github.com/taj54/ambient-music-vs-extension) or email [tajulislamj200@gmail.com](mailto\:tajulislamj200@gmail.com)
 
 ---
 
-## 🔖 License
+## 💼 License
 
-MIT License © 2025 [taj](tajulislamj200@gmail.com)
+MIT License © 2025 Tajul Islam
 
 ---
 
 ## 💬 Credits
 
-Default music provided by [Lofi Girl](https://www.youtube.com/@lofigirl)
+- Default stream by [Lofi Girl](https://www.youtube.com/@lofigirl)
 
----
+> ✨ *Focus better. Code deeper. Let your workspace sing.*
 
-> 💡 *Improve focus. Eliminate friction. Let your workspace sing.*

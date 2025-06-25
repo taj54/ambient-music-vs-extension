@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Ambient Music Client</title>
+</head>
+
+<body>
+  <h2>🎵 Ambient Music Client</h2>
+  <iframe id="player" width="560" height="315" src="https://www.youtube.com/embed/jfKfPfyJRdk?enablejsapi=1"
+    frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+  </iframe>
+
+  <script>
+    const socket = new WebSocket("ws://localhost:3000");
+    let player;
+
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+      });
+    }
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+
+    socket.onmessage = (event) => {
+      const { command } = JSON.parse(event.data);
+      console.log('Command:', command);
+      if (!player) return;
+
+      if (command === 'play' || command === 'resume') {
+        player.playVideo();
+      } else if (command === 'pause') {
+        player.pauseVideo();
+      }
+
+    };
+  </script>
+</body>
+
+</html>
