@@ -17,7 +17,7 @@ Boost your focus and flow with ambient music that plays automatically when you o
 
 ### 1. Clone the Repo
 ```bash
-git clone https://github.com/your-username/ambient-music-extension.git
+git clone https://github.com/taj54/ambient-music-vs-extension.git
 cd ambient-music-extension
 ```
 
