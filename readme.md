@@ -1,13 +1,11 @@
 # 🎵 Ambient Music AutoPlayer for VS Code
 
-
 > **Inspiration**  
 > One day, I realized I had been feeling unproductive for several days. After a quick self-reflection, I discovered that watching TV series and movies in the background while coding was draining my focus and creativity. This insight inspired me to build a tool for myself—and for thousands of other developers who face similar distractions—to help us stay in the zone with relaxing ambient music.
 
-
 ---
 
-## 🆕 Version 1.2.31
+## 🆕 Version 1.2.42
 
 Ambient music starts automatically with your project, and gently switches tracks every 30 minutes to keep your flow alive.
 
@@ -21,6 +19,7 @@ Ambient music starts automatically with your project, and gently switches tracks
 - ✅ Supports reconnecting WebSocket clients
 - ✅ Manual play/pause/resume via Command Palette
 - ✅ Easily set your own playlist via command
+- ✅ Manually close the tab via `Ambient Music: ❌ Close Tab` command
 - ✅ No configuration required for default usage
 
 ---
@@ -43,17 +42,18 @@ Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and search for:
 - `Ambient Music: ▶ Resume`
 - `Ambient Music: 🌐 Open in Browser`
 - `Ambient Music: 🎶 Set Playlist`
+- `Ambient Music: ❌ Close Tab`
 
 ---
 
 ## 🔧 Configuration (Optional)
 
-You can customize settings via your `settings.json` file:
+Customize settings via `settings.json`:
 
 ```json
 {
-  "ambientMusic.port": 0, // 0 for dynamic port selection
-  "ambientMusic.switchIntervalMinutes": 30, 
+  "ambientMusic.port": 0,
+  "ambientMusic.switchIntervalMinutes": 30,
   "ambientMusic.playlist": [
     "https://www.youtube.com/watch?v=jfKfPfyJRdk",
     "https://www.youtube.com/watch?v=5qap5aO4i9A"
@@ -61,7 +61,7 @@ You can customize settings via your `settings.json` file:
 }
 ```
 
-> ℹ️ These settings allow you to personalize the experience without editing code.
+> ℹ️ Use these to personalize your flow.
 
 ---
 
@@ -74,7 +74,6 @@ To replace the default music with your own:
 3. Paste YouTube video URLs (comma-separated)
 
 Example:
-
 ```
 https://youtu.be/video1, https://youtu.be/video2
 ```
@@ -83,14 +82,16 @@ https://youtu.be/video1, https://youtu.be/video2
 
 ## 📁 Installation
 
-Install directly from the [**Visual Studio Code Marketplace**](https://marketplace.visualstudio.com/items?itemName=taj54dev.ambient-music-extension).
+Install from [**Visual Studio Code Marketplace**](https://marketplace.visualstudio.com/items?itemName=taj54dev.ambient-music-extension).
+
+> 💡 Want to close the music tab without shutting down the extension? Use the `Ambient Music: ❌ Close Tab` command.
 
 ---
 
 ## 🔗 Requirements
 
-- VS Code version 1.80 or newer
-- Internet access (for streaming YouTube audio)
+- VS Code version 1.80+
+- Internet access for streaming
 
 ---
 

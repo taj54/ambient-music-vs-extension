@@ -38,26 +38,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.run = run;
 const path = __importStar(require("path"));
-const glob_1 = __importDefault(require("glob"));
 const mocha_1 = __importDefault(require("mocha"));
+const glob_1 = __importDefault(require("glob"));
 function run() {
+    // Create Mocha test instance
     const mocha = new mocha_1.default({
         ui: 'bdd',
-        color: true
+        color: true,
     });
     const testsRoot = path.resolve(__dirname, '..');
     return new Promise((resolve, reject) => {
         (0, glob_1.default)('**/*.test.js', { cwd: testsRoot }, (err, files) => {
-            if (err) {
+            if (err)
                 return reject(err);
-            }
+            files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
             try {
-                for (const file of files) {
-                    mocha.addFile(path.resolve(testsRoot, file));
-                }
                 mocha.run(failures => {
                     if (failures > 0) {
-                        reject(new Error(`${failures} test(s) failed.`));
+                        reject(new Error(`${failures} tests failed.`));
                     }
                     else {
                         resolve();

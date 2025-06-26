@@ -7,6 +7,7 @@ class webSocketManager {
   private static instance: webSocketManager;
   private wss: WebSocketServer | undefined;
   private connectedClient: WebSocket | undefined;
+  private tabWasManuallyClosed: boolean = false;
 
   private constructor() { }
 
@@ -37,17 +38,30 @@ class webSocketManager {
       console.log('✅ WebSocket client connected', clientUrl);
       this.connectedClient = ws;
       markTabOpen();
-
+      this.resetManualCloseFlag();
       ws.on('message', msg => {
-        console.log(`💬 Received from client: ${msg}`);
+        try {
+          const data = JSON.parse(msg.toString());
+          if (data.command === 'clientClosed') {
+            console.log('[Ambient Music] Client tab reported closed.');
+            markTabClosed();
+            this.tabWasManuallyClosed = true;
+          }
+        } catch (e) {
+          console.error('WebSocket message error:', e);
+        }
       });
 
       ws.on('close', () => {
         console.log('❌ Client disconnected');
         this.connectedClient = undefined;
         markTabClosed();
-        tryOpenTab(clientUrl);
-        this.trySendPlay();
+        // ✅ Only reopen if not manually closed
+        if (!this.tabWasManuallyClosed) {
+          tryOpenTab(clientUrl);
+          this.trySendPlay();
+        }
+
       });
 
       ws.on('error', err => {
@@ -57,8 +71,12 @@ class webSocketManager {
 
     return this.wss;
   }
+  public resetManualCloseFlag() {
+    this.tabWasManuallyClosed = false;
+  }
 
-  public startRotation(clientUrl: string, intervalMinutes: number ) {
+
+  public startRotation(clientUrl: string, intervalMinutes: number) {
     setInterval(() => {
       const next = nextTrack();
 
@@ -69,9 +87,13 @@ class webSocketManager {
         vscode.window.showWarningMessage('⚠️ No active WebSocket client to switch track.');
       }
 
-      if (!isTabCurrentlyOpen()) {
-        tryOpenTab(clientUrl);
+      if (!isTabCurrentlyOpen() && this.connectedClient === undefined) {
+        if (!this.tabWasManuallyClosed) {
+          tryOpenTab(clientUrl);
+          this.trySendPlay();
+        }
       }
+
 
     }, intervalMinutes * 60 * 1000); //default 1 minute
   }
@@ -94,9 +116,21 @@ class webSocketManager {
       }
     }, delayMs);
   }
+  public send(message: any) {
+    const payload = JSON.stringify(message);
+    this.wss?.clients.forEach(client => {
+      if (client.readyState === client.OPEN) {
+        client.send(payload);
+      }
+    });
+  }
+
 
   public shutdown() {
     if (this.wss) {
+      // ✅ Broadcast tab close command before shutdown
+      this.send({ command: 'close_tab' });
+
       this.wss.close(() => console.log('[Ambient Music] WebSocket server closed.'));
       this.wss = undefined;
       this.connectedClient = undefined;

@@ -54,11 +54,17 @@ export function registerCommands(context: vscode.ExtensionContext) {
     }
   });
 
+  const closeTabCommand = vscode.commands.registerCommand('ambientMusic.closeTab', () => {
+    sendCommand('close_tab', '❌ Close Tab');
+  });
+
+
   context.subscriptions.push(
     openCommand,
     playCommand,
     pauseCommand,
     resumeCommand,
-    setPlaylistCommand
+    setPlaylistCommand,
+    closeTabCommand
   );
 }

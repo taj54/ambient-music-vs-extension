@@ -1,19 +1,15 @@
 # 🛠️ Developer Guide – Ambient Music VS Code Extension
 
-
 > **Inspiration**  
 > One day, I realized I had been feeling unproductive for several days. After a quick self-reflection, I discovered that watching TV series and movies in the background while coding was draining my focus and creativity. This insight inspired me to build a tool for myself—and for thousands of other developers who face similar distractions—to help us stay in the zone with relaxing ambient music.
 
-
 ---
 
-## 🆕 Version 1.2.31
+## 🆕 Version 1.2.42
 
 This document helps you set up, build, run, and customize the Ambient Music AutoPlayer extension for Visual Studio Code.
 
 ---
-
-
 
 ## 📁 Project Structure
 
@@ -26,9 +22,10 @@ ambient-music-vs-extension/
 │   ├── extension.ts       # Main activation script
 │   ├── commands.ts        # VS Code command registration
 │   ├── playlist.ts        # Playlist management logic
-│   ├── socket.ts          # WebSocket logic (singleton)
-│   ├── server.ts          # HTTP + WebSocket entry point
+│   ├── webSocketManager.ts # WebSocket logic (singleton)
+│   ├── serverManager.ts   # HTTP + WebSocket entry point
 │   └── utils/             # Utilities (browser, config, logger)
+├── test/                  # Mocha test suite for extension
 ├── package.json           # Extension metadata and commands
 ├── tsconfig.json          # TypeScript config
 └── README.md              # User-facing README
@@ -71,46 +68,50 @@ Expected result:
 ## 🧠 How It Works
 
 1. On activation, the extension launches a local HTTP server and serves a YouTube player HTML client.
-2. A WebSocket is opened to control playback.
-3. Ambient music plays automatically, and rotates every 30 minutes (or user-configured interval).
+2. A WebSocket server opens to control playback (singleton).
+3. Ambient music plays automatically, rotating every X minutes.
+4. If no VS Code workspace is open, the extension self-deactivates and closes the browser tab (via `close_tab` signal).
 
 Command Palette support:
 
 - `Ambient Music: Open` – opens the tab manually
 - `Ambient Music: Play`, `Pause`, `Resume`
 - `Ambient Music: Set Playlist` – change the active list of YouTube tracks
+- `Ambient Music: Close Tab` – manually request the client to close
 
 ---
 
-## 🔧 Customization
+## 🔧 Configuration
 
-To customize the playlist permanently, you can:
+You can customize your setup using VS Code settings (`settings.json`):
 
 ```json
-// settings.json (user or workspace)
-"ambientMusic.playlist": [
-  "https://www.youtube.com/watch?v=jfKfPfyJRdk",
-  "https://www.youtube.com/watch?v=5qap5aO4i9A"
-]
+{
+  "ambientMusic.port": 0, // Dynamic or fixed port
+  "ambientMusic.switchIntervalMinutes": 30,
+  "ambientMusic.playlist": [
+    "https://youtu.be/jfKfPfyJRdk",
+    "https://youtu.be/5qap5aO4i9A"
+  ]
+}
 ```
-
-Or update during runtime using `Ambient Music: Set Playlist`.
 
 ---
 
-## 🌀 Rotation Logic
+## 🌀 Track Rotation Logic
 
-The extension automatically switches to the next track every X minutes:
+Implemented using `setInterval()` in the WebSocket manager. It sends a `"switch"` command with the next track URL:
 
 ```ts
-startRotation(clientUrl, intervalMs);
+startRotation(clientUrl, intervalMinutes);
 ```
 
-To change the rotation interval:
+---
 
-```json
-"ambientMusic.switchIntervalMinutes": 30
-```
+## 🔐 Singleton + Lockfile
+
+- Prevents duplicate server or tab instances using a `.ambient-music-extension.lock` file.
+- Removed automatically on shutdown or deactivation.
 
 ---
 
@@ -122,29 +123,21 @@ To change the rotation interval:
 npm install -g vsce
 ```
 
-2. **Package the Extension**:
+2. **Package It**:
 
 ```bash
 vsce package
 ```
 
-3. Distribute `.vsix` or publish to Marketplace
+3. Upload the `.vsix` to the VS Code Marketplace.
 
 ---
 
-## 🧪 Testing Tips
+## 🧪 Testing
 
-- Check `client.html` for YouTube embed readiness.
+- Tests are located in `/test` and use Mocha.
+- Run using VS Code Extension test runner.
 - Use `Developer: Toggle Developer Tools` for JS errors.
-- Watch logs in VS Code terminal for WebSocket events.
-
----
-
-## 🔗 Requirements
-
-- Node.js v18+
-- VS Code v1.80+
-- Internet connection
 
 ---
 
@@ -158,4 +151,4 @@ MIT License © 2025 [Tajul Islam](mailto:tajulislamj200@gmail.com)
 
 - Music by [Lofi Girl](https://www.youtube.com/@lofigirl)
 
-> *Turn your VS Code into a calming workspace.*
+> *Turn your VS Code into a calming workspace. And contribute mindfully.*

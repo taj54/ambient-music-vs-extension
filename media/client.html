@@ -41,6 +41,10 @@
 
     socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
+
+
+
+      // Normal command flow
       if (!player || typeof player.playVideo !== 'function') {
         commandQueue.push(data);
         return;
@@ -70,11 +74,15 @@
           const vid = extractVideoID(url);
           if (vid) {
             player.loadVideoById(vid);
-            // player.mute(); // Ensure autoplay
             player.playVideo();
           }
           break;
+        case 'close_tab':
+          socket.send(JSON.stringify({ command: 'clientClosed' }));
+          window.close();
+          break;
       }
+
     }
 
     function extractVideoID(url) {

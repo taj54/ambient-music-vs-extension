@@ -3,7 +3,7 @@
   "displayName": "Ambient Music AutoPlayer by Taj",
   "icon": "media/logo.png",
   "description": "Auto-play ambient music when a VS Code project opens.",
-  "version": "1.2.31",
+  "version": "1.2.43",
   "publisher": "taj154dev",
   "repository": {
     "type": "git",
@@ -12,7 +12,7 @@
   "engines": {
     "vscode": "^1.80.0"
   },
-  "main": "./dist/extension.js",
+  "main": "./dist/src/extension.js",
   "activationEvents": [
     "onStartupFinished",
     "workspaceContains:**/*"
@@ -38,6 +38,10 @@
       {
         "command": "ambientMusic.resume",
         "title": "Resume Ambient Music"
+      },
+      {
+        "command": "ambientMusic.closeTab",
+        "title": "Close Ambient Music Tab"
       }
     ],
     "configuration": {

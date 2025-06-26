@@ -5,6 +5,7 @@ import { webSocketSingleton } from './webSocketManager';
 
 let hasInitialized = false;
 
+
 /**
  * Called when the extension is activated
  */
@@ -19,6 +20,13 @@ export function activate(context: vscode.ExtensionContext) {
 
   serverSingleton.start(context);
   registerCommands(context);
+
+  vscode.workspace.onDidChangeWorkspaceFolders(() => {
+    if (vscode.workspace.workspaceFolders?.length === 0) {
+      console.log('[Ambient Music] All workspaces closed. Shutting down.');
+      deactivate(); 
+    }
+  });
 }
 
 /**

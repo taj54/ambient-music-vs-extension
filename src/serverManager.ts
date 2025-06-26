@@ -1,12 +1,15 @@
 import * as http from 'http';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import * as vscode from 'vscode';
 import { tryOpenTab } from './utils/browser';
 import { webSocketSingleton } from './webSocketManager';
 import { getCurrentTrack, loadUserPlaylistFromConfig } from './playlist';
 import { logInfo } from './utils/logger';
 import { getExtensionConfig } from './utils/config';
+
+const LOCK_FILE = path.join(os.tmpdir(), 'ambient-music-extension.lock');
 
 export class serverManager {
   private static instance: serverManager;
@@ -22,8 +25,21 @@ export class serverManager {
   }
 
   public start(context: vscode.ExtensionContext) {
-    if (this.server) {
-      console.warn('[Ambient Music] Server already initialized.');
+    // 🔒 Prevent multiple instances using a lock file
+    logInfo("the lock file location"+LOCK_FILE)
+    if (fs.existsSync(LOCK_FILE)) {
+      console.warn('[Ambient Music] Another instance is already active.');
+      vscode.window.showWarningMessage(
+        'Ambient Music Extension is already running in another VS Code window.'
+      );
+      return;
+    }
+
+    // 📝 Write PID to lock file
+    try {
+      fs.writeFileSync(LOCK_FILE, process.pid.toString(), { flag: 'wx' });
+    } catch (err) {
+      console.error('[Ambient Music] Failed to create lock file:', err);
       return;
     }
 
@@ -51,7 +67,7 @@ export class serverManager {
       }
     });
 
-    this.server.listen(preferredPort , () => {
+    this.server.listen(preferredPort, () => {
       const address = this.server?.address();
       const actualPort = typeof address === 'object' && address?.port ? address.port : preferredPort;
 
@@ -67,11 +83,25 @@ export class serverManager {
       wsManager.startRotation(clientUrl, switchIntervalMinutes);
       wsManager.trySendPlay(5, 1000);
     });
+
+    context.subscriptions.push({ dispose: () => this.stop() });
   }
 
   public stop() {
+    // ❌ Cleanup lock file
+    if (fs.existsSync(LOCK_FILE)) {
+      try {
+        fs.unlinkSync(LOCK_FILE);
+        console.log('[Ambient Music] Lock file removed.');
+      } catch (err) {
+        console.error('[Ambient Music] Failed to remove lock file:', err);
+      }
+    }
+
     if (this.server) {
-      this.server.close(() => console.log('[Ambient Music] HTTP server closed.'));
+      this.server.close(() => {
+        console.log('[Ambient Music] HTTP server closed.');
+      });
       this.server = undefined;
     }
   }
