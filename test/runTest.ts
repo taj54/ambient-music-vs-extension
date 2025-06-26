@@ -3,12 +3,10 @@ import { runTests } from '@vscode/test-electron';
 
 async function main() {
   try {
-    const extensionDevelopmentPath = path.resolve(__dirname, '../');
-    const extensionTestsPath = path.resolve(__dirname, './');
-
     await runTests({
-      extensionDevelopmentPath,
-      extensionTestsPath,
+      extensionDevelopmentPath: path.resolve(__dirname, '../../'),
+      extensionTestsPath: path.resolve(__dirname, './suite/index'),
+      vscodeExecutablePath: 'C:/vscode-test/code.exe', 
     });
   } catch (err) {
     console.error('Failed to run tests', err);
