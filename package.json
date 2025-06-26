@@ -2,7 +2,7 @@
   "name": "ambient-music-extension",
   "displayName": "Ambient Music AutoPlayer",
   "description": "Auto-play ambient music when a VS Code project opens.",
-  "version": "1.0.0",
+  "version": "1.2.1",
   "publisher": "taj54dev",
   "repository": {
     "type": "git",
@@ -71,14 +71,22 @@
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node ./dist/test/runTest.js"
   },
   "devDependencies": {
+    "@types/chai": "^5.2.2",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^24.0.4",
     "@types/vscode": "^1.80.0",
     "@types/ws": "^8.18.1",
+    "@vscode/test-electron": "^2.5.2",
+    "chai": "^5.2.0",
+    "mocha": "^11.7.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.0.0",
-    "vsce": "^2.15.0"
+    "vsce": "^2.15.0",
+    "vscode-test": "^1.6.1"
   },
   "dependencies": {
     "ws": "^8.18.2"
