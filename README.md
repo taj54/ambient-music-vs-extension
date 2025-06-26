@@ -82,7 +82,7 @@ https://youtu.be/video1, https://youtu.be/video2
 
 ## 📁 Installation
 
-Install from [**Visual Studio Code Marketplace**](https://marketplace.visualstudio.com/items?itemName=taj54dev.ambient-music-extension).
+Install from [**Visual Studio Code Marketplace**](https://marketplace.visualstudio.com/items?itemName=taj154dev.ambient-music-vs-extension).
 
 > 💡 Want to close the music tab without shutting down the extension? Use the `Ambient Music: ❌ Close Tab` command.
 
