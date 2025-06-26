@@ -5,11 +5,10 @@
     "outDir": "dist",
     "lib": ["es2020"],
     "sourceMap": true,
-    "rootDir": ".",
+    "rootDir": "src",
     "strict": true,
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "include": ["src", "test"],
   "exclude": ["node_modules", ".vscode-test"]
 }
