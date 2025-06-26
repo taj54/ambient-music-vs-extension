@@ -5,7 +5,7 @@
 
 ---
 
-## 🆕 Version 1.2.42
+## 🆕 Version 1.2.43
 
 Ambient music starts automatically with your project, and gently switches tracks every 30 minutes to keep your flow alive.
 
@@ -113,5 +113,12 @@ MIT License © 2025 [Tajul Islam](https://github.com/taj54)
 ## 💬 Credits
 
 - Default music stream by [Lofi Girl](https://www.youtube.com/@lofigirl)
+-- Built with ❤️ by [Taj](https://github.com/taj54)
+
+## 🧰 Developer Guide
+
+If you're interested in contributing or modifying this extension, check out the [**DEVELOPER_GUIDE.md**](./DEVELOPER_GUIDE.md) for setup instructions, architecture overview, packaging guide, and testing tips.
+
+---
 
 > ✨ _Focus better. Code deeper. Let your workspace sing._
