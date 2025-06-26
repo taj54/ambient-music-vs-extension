@@ -5,7 +5,7 @@
 
 ---
 
-## 🆕 Version 1.2.43
+## 🆕 Version 1.2.44
 
 Ambient music starts automatically with your project, and gently switches tracks every 30 minutes to keep your flow alive.
 

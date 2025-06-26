@@ -7,7 +7,7 @@
 
 ---
 
-## 🆕 Version 1.2.43
+## 🆕 Version 1.2.44
 
 This guide helps you **set up**, **build**, **test**, and **contribute** to the Ambient Music AutoPlayer extension for Visual Studio Code.
 
