@@ -1,8 +1,9 @@
 {
   "name": "ambient-music-vs-extension",
   "displayName": "Ambient Music AutoPlayer by Taj",
+  "icon": "media/logo.png",
   "description": "Auto-play ambient music when a VS Code project opens.",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "publisher": "taj154dev",
   "repository": {
     "type": "git",
