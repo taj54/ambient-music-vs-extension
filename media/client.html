@@ -3,41 +3,84 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Ambient Music Client</title>
+  <title>Ambient Music</title>
 </head>
 
 <body>
   <h2>🎵 Ambient Music Client</h2>
-  <iframe id="player" width="560" height="315" src="https://www.youtube.com/embed/jfKfPfyJRdk?enablejsapi=1"
-    frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
-  </iframe>
+  <div id="player-container">
+    <div id="player"></div>
+  </div>
 
   <script>
-    const socket = new WebSocket("ws://localhost:3000");
+    const queryParams = new URLSearchParams(window.location.search);
+    const port = queryParams.get("port");
+    const socket = new WebSocket(`ws://localhost:${port}`);
+
     let player;
+    let commandQueue = [];
 
-
-    function onYouTubeIframeAPIReady() {
-      player = new YT.Player('player', {
-      });
-    }
+    // Inject YouTube API
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
-    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+
+    window.onYouTubeIframeAPIReady = function () {
+      const initialVideoId = extractVideoID("{{VIDEO_URL}}");
+
+      player = new YT.Player('player', {
+        height: '315',
+        width: '560',
+        videoId: initialVideoId,
+        playerVars: { autoplay: 1, mute: 1 },
+        events: {
+          onReady: () => flushQueuedCommands()
+        }
+      });
+    };
 
     socket.onmessage = (event) => {
-      const { command } = JSON.parse(event.data);
-      console.log('Command:', command);
-      if (!player) return;
-
-      if (command === 'play' || command === 'resume') {
-        player.playVideo();
-      } else if (command === 'pause') {
-        player.pauseVideo();
+      const data = JSON.parse(event.data);
+      if (!player || typeof player.playVideo !== 'function') {
+        commandQueue.push(data);
+        return;
       }
-
+      handleCommand(data);
     };
+
+    function flushQueuedCommands() {
+      while (commandQueue.length > 0) {
+        handleCommand(commandQueue.shift());
+      }
+    }
+
+    function handleCommand({ command, url }) {
+      switch (command) {
+        case 'play':
+        case 'resume':
+          player.playVideo();
+          break;
+        case 'pause':
+          player.pauseVideo();
+          break;
+        case 'unmute':
+          player.unMute();
+          break;
+        case 'switch':
+          const vid = extractVideoID(url);
+          if (vid) {
+            player.loadVideoById(vid);
+            // player.mute(); // Ensure autoplay
+            player.playVideo();
+          }
+          break;
+      }
+    }
+
+    function extractVideoID(url) {
+      const match = url.match(/(?:embed\/|v=|youtu\.be\/)([\w-]{11})/);
+      return match ? match[1] : null;
+    }
   </script>
 </body>
 

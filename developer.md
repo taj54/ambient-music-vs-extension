@@ -1,18 +1,34 @@
 # 🛠️ Developer Guide – Ambient Music VS Code Extension
 
+
+> **Inspiration**  
+> One day, I realized I had been feeling unproductive for several days. After a quick self-reflection, I discovered that watching TV series and movies in the background while coding was draining my focus and creativity. This insight inspired me to build a tool for myself—and for thousands of other developers who face similar distractions—to help us stay in the zone with relaxing ambient music.
+
+
+---
+
+## 🆕 Version 1.2.0
+
 This document helps you set up, build, run, and customize the Ambient Music AutoPlayer extension for Visual Studio Code.
 
 ---
+
+
 
 ## 📁 Project Structure
 
 ```
 ambient-music-vs-extension/
 ├── .vscode/               # VS Code launch configs
-├── media/                 # Extension icon/media (if any)
-├── dist/                   # Compiled JavaScript output
+├── media/                 # HTML client for YouTube playback
+├── dist/                  # Compiled JavaScript output
 ├── src/                   # Source TypeScript files
-│   └── extension.ts       # Main activation script
+│   ├── extension.ts       # Main activation script
+│   ├── commands.ts        # VS Code command registration
+│   ├── playlist.ts        # Playlist management logic
+│   ├── socket.ts          # WebSocket logic (singleton)
+│   ├── server.ts          # HTTP + WebSocket entry point
+│   └── utils/             # Utilities (browser, config, logger)
 ├── package.json           # Extension metadata and commands
 ├── tsconfig.json          # TypeScript config
 └── README.md              # User-facing README
@@ -47,82 +63,92 @@ npm run compile
 - Press `F5` to launch a **new Extension Development Host**
 
 Expected result:
-- A lofi music stream opens in your browser
+- A YouTube lofi stream opens in your browser
 - A toast notification appears in VS Code
 
 ---
 
 ## 🧠 How It Works
 
-The extension activates on startup:
+1. On activation, the extension launches a local HTTP server and serves a YouTube player HTML client.
+2. A WebSocket is opened to control playback.
+3. Ambient music plays automatically, and rotates every 30 minutes (or user-configured interval).
 
-```ts
-const musicURL = vscode.Uri.parse("https://www.youtube.com/watch?v=jfKfPfyJRdk");
-vscode.env.openExternal(musicURL);
-```
+Command Palette support:
 
-It also exposes a command:
-- `Ambient Music: Play Ambient Music` – can be triggered manually from the Command Palette (`Ctrl+Shift+P`)
+- `Ambient Music: Open` – opens the tab manually
+- `Ambient Music: Play`, `Pause`, `Resume`
+- `Ambient Music: Set Playlist` – change the active list of YouTube tracks
 
 ---
 
-## 🎵 Customizing the Music Source
+## 🔧 Customization
 
-You can change the stream URL by modifying:
+To customize the playlist permanently, you can:
 
-```ts
-// src/extension.ts
-const musicURL = vscode.Uri.parse("https://your.custom.url");
+```json
+// settings.json (user or workspace)
+"ambientMusic.playlist": [
+  "https://www.youtube.com/watch?v=jfKfPfyJRdk",
+  "https://www.youtube.com/watch?v=5qap5aO4i9A"
+]
 ```
 
-Then recompile:
+Or update during runtime using `Ambient Music: Set Playlist`.
 
-```bash
-npm run compile
+---
+
+## 🌀 Rotation Logic
+
+The extension automatically switches to the next track every X minutes:
+
+```ts
+startRotation(clientUrl, intervalMs);
+```
+
+To change the rotation interval:
+
+```json
+"ambientMusic.switchIntervalMinutes": 30
 ```
 
 ---
 
 ## 📦 Packaging the Extension
 
-To distribute the extension:
-
-1. **Install `vsce`** (Visual Studio Code Extension Manager):
+1. **Install `vsce`**:
 
 ```bash
 npm install -g vsce
 ```
 
-2. **Create a `.vsix` file**:
+2. **Package the Extension**:
 
 ```bash
 vsce package
 ```
 
-3. This generates a `.vsix` file you can:
-   - Share with users
-   - Install locally via `Extensions: Install from VSIX`
-   - Publish to the [VS Code Marketplace](https://code.visualstudio.com/api/working-with-extensions/publishing-extension)
+3. Distribute `.vsix` or publish to Marketplace
 
 ---
 
 ## 🧪 Testing Tips
 
-- Ensure your internet connection is active (YouTube stream won't open offline).
-- Use incognito mode or a different browser to test external link behavior.
-- Use breakpoints in `extension.ts` to debug activation logic.
+- Check `client.html` for YouTube embed readiness.
+- Use `Developer: Toggle Developer Tools` for JS errors.
+- Watch logs in VS Code terminal for WebSocket events.
 
 ---
 
-## 🧰 Dev Requirements
+## 🔗 Requirements
 
-- Node.js v18 or newer
+- Node.js v18+
 - VS Code v1.80+
-- Internet access to stream music
+- Internet connection
 
 ---
 
-## �� License
+## 📜 License
 
 MIT License © 2025 [Tajul Islam](mailto:tajulislamj200@gmail.com)
 
@@ -130,7 +156,6 @@ MIT License © 2025 [Tajul Islam](mailto:tajulislamj200@gmail.com)
 
 ## 🙌 Credits
 
-- Music provided by [Lofi Girl](https://www.youtube.com/@lofigirl)
+- Music by [Lofi Girl](https://www.youtube.com/@lofigirl)
 
-> *Make VS Code not just smart, but soothing.*
-
+> *Turn your VS Code into a calming workspace.*

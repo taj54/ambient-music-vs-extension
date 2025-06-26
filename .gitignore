@@ -12,3 +12,6 @@ package-lock.json
 # Ignore Visual Studio Code extensions
 # These files are packaged extensions for Visual Studio Code and are not needed in the repository
 *.vsix
+
+#Ignore the logs folder that contains local test only
+logs/

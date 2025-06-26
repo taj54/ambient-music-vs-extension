@@ -1,54 +1,86 @@
 {
-    "name": "ambient-music-extension",
-    "displayName": "Ambient Music AutoPlayer",
-    "description": "Auto-play ambient music when a VS Code project opens.",
-    "version": "1.0.0",
-    "publisher": "taj54dev",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/taj54/ambient-music-vs-extension.git"
-    },
-    "engines": {
-        "vscode": "^1.80.0"
-    },
-    "main": "./dist/extension.js",
-    "activationEvents": [
-        "onStartupFinished",
-        "workspaceContains:**/*"
+  "name": "ambient-music-extension",
+  "displayName": "Ambient Music AutoPlayer",
+  "description": "Auto-play ambient music when a VS Code project opens.",
+  "version": "1.0.0",
+  "publisher": "taj54dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taj54/ambient-music-vs-extension.git"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished",
+    "workspaceContains:**/*"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "ambientMusic.setPlaylist",
+        "title": "Ambient Music: Set Playlist"
+      },
+      {
+        "command": "ambientMusic.open",
+        "title": "Open Ambient Music Panel"
+      },
+      {
+        "command": "ambientMusic.play",
+        "title": "Play Ambient Music"
+      },
+      {
+        "command": "ambientMusic.pause",
+        "title": "Pause Ambient Music"
+      },
+      {
+        "command": "ambientMusic.resume",
+        "title": "Resume Ambient Music"
+      }
     ],
-    "contributes": {
-        "commands": [
-            {
-                "command": "ambientMusic.open",
-                "title": "Open Ambient Music Panel"
-            },
-            {
-                "command": "ambientMusic.play",
-                "title": "Play Ambient Music"
-            },
-            {
-                "command": "ambientMusic.pause",
-                "title": "Pause Ambient Music"
-            },
-            {
-                "command": "ambientMusic.resume",
-                "title": "Resume Ambient Music"
-            }
-        ]
-    },
-    "scripts": {
-        "vscode:prepublish": "tsc -p ./",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./"
-    },
-    "devDependencies": {
-        "@types/node": "^24.0.4",
-        "@types/vscode": "^1.80.0",
-        "@types/ws": "^8.18.1",
-        "typescript": "^5.0.0",
-        "vsce": "^2.15.0"
-    },
-    "dependencies": {
-        "ws": "^8.18.2"
+    "configuration": {
+      "title": "Ambient Music Settings",
+      "properties": {
+        "ambientMusic.port": {
+          "type": "number",
+          "default": 0,
+          "description": "Port for the ambient music WebSocket server. Set to 0 for dynamic port."
+        },
+        "ambientMusic.switchIntervalMinutes": {
+          "type": "number",
+          "default": 30,
+          "description": "How often (in minutes) to switch to the next ambient video from the playlist."
+        },
+        "ambientMusic.debug": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable verbose debug logging for Ambient Music."
+        },
+        "ambientMusic.playlist": {
+          "type": "array",
+          "description": "Custom playlist of YouTube URLs to play.",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      }
     }
+  },
+  "scripts": {
+    "vscode:prepublish": "tsc -p ./",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.4",
+    "@types/vscode": "^1.80.0",
+    "@types/ws": "^8.18.1",
+    "typescript": "^5.0.0",
+    "vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "ws": "^8.18.2"
+  }
 }
