@@ -12,7 +12,7 @@ Thank you for considering contributing to the **Ambient Music VS Code Extension*
 Click the **Fork** button in the top-right corner of the [GitHub repo](https://github.com/taj54/ambient-music-vs-extension), and clone your fork locally:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ambient-music-vs-extension.git
+git clone https://github.com/taj54/ambient-music-vs-extension.git
 cd ambient-music-vs-extension
 ```
 

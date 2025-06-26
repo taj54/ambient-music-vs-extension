@@ -106,7 +106,7 @@ Have feedback or issues?
 
 ## 💼 License
 
-MIT License © 2025 [Tajul Islam](https://github.com/taj54)
+MIT License © 2025 [Taj](https://github.com/taj54)
 
 ---
 
