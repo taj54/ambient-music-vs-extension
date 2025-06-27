@@ -91,14 +91,17 @@ Expected:
 
 ## 🎯 Commands (Dev or Test)
 
-| Command                      | Description                         |
-|-----------------------------|-------------------------------------|
-| `Ambient Music: Open`       | Open the player manually            |
-| `Ambient Music: Play`       | Force play via WebSocket            |
-| `Ambient Music: Pause`      | Pause playback                      |
-| `Ambient Music: Resume`     | Resume playback                     |
-| `Ambient Music: Set Playlist` | Set your own video URLs            |
-| `Ambient Music: Close Tab`  | Force-close browser tab (via socket)|
+| Command                                 | Description                                           |
+|-----------------------------------------|-------------------------------------------------------|
+| `ambient-taj: 🎶 Set Playlist`          | Choose from relaxing playlists like Rain, Forest, Ocean, etc. |
+| `ambient-taj: 🌐 Open Ambient Music Tab` | Opens the ambient player tab inside VS Code.         |
+| `ambient-taj: ▶ Play Ambient Music`     | Begin playing the ambient track.                     |
+| `ambient-taj: ⏸ Pause Ambient Music`    | Temporarily pause the current music.                 |
+| `ambient-taj: ▶ Resume Ambient Music`   | Resume playback from where it was paused.            |
+| `ambient-taj: ❌ Close Ambient Music Tab`| Close the music tab and stop playback.               |
+
+---
+> 💡 **Tip:** You can customize keybindings for these commands or use them in your automation workflows inside VS Code.
 
 ---
 

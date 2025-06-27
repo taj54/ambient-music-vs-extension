@@ -36,12 +36,15 @@ Ambient music starts automatically with your project and seamlessly transitions 
 
 Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and search for:
 
-- `Ambient Music: ▶ Play`
-- `Ambient Music: ⏸ Pause`
-- `Ambient Music: ▶ Resume`
-- `Ambient Music: 🌐 Open in Browser`
-- `Ambient Music: 🎶 Set Playlist`
-- `Ambient Music: ❌ Close Tab`
+- `ambient-taj: 🎶 Set Playlist` – Choose from relaxing playlists like Rain, Forest, Ocean, etc.
+- `ambient-taj: 🌐 Open Ambient Music Tab` – Opens the ambient player tab inside VS Code.
+- `ambient-taj: ▶ Play Ambient Music` – Begin playing the ambient track.
+- `ambient-taj: ⏸ Pause Ambient Music` – Temporarily pause the current music.
+- `ambient-taj: ▶ Resume Ambient Music` – Resume playback from where it was paused.
+- `ambient-taj: ❌ Close Ambient Music Tab` – Close the music tab and stop playback.
+
+---
+> 💡 **Tip:** You can customize keybindings for these commands or use them in your automation workflows inside VS Code.
 
 ---
 
