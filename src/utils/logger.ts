@@ -2,69 +2,83 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const outputChannel = vscode.window.createOutputChannel('Ambient Music');
-let logFilePath: string | undefined;
+ class Logger {
+  private static instance: Logger;
+  private readonly outputChannel: vscode.OutputChannel;
+  private logFilePath: string | undefined;
 
-// Initialize log file
-function getLogFilePath(): string {
-  if (!logFilePath) {
-    const logDir = path.join(__dirname, '..', '..', 'logs');
-    if (!fs.existsSync(logDir)) {
-      fs.mkdirSync(logDir, { recursive: true });
+  private constructor() {
+    this.outputChannel = vscode.window.createOutputChannel('Ambient Music');
+  }
+
+  public static getInstance(): Logger {
+    if (!Logger.instance) {
+      Logger.instance = new Logger();
     }
-    logFilePath = path.join(logDir, 'ambient.log');
+    return Logger.instance;
   }
-  return logFilePath;
-}
 
-// Append log to disk
-function appendToDisk(message: string) {
-  if (!isDebugMode()) return;
-  const timestamp = new Date().toISOString();
-  fs.appendFileSync(getLogFilePath(), `[${timestamp}] ${message}\n`);
-}
+  private isDebugMode(): boolean {
+    return vscode.workspace.getConfiguration('ambientMusic').get<boolean>('debug', false);
+  }
 
-// Check if debug mode is enabled
-function isDebugMode(): boolean {
-  return vscode.workspace.getConfiguration('ambientMusic').get<boolean>('debug', false);
-}
+  private getLogFilePath(): string {
+    if (!this.logFilePath) {
+      const logDir = path.join(__dirname, '..', '..', 'logs');
+      if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir, { recursive: true });
+      }
+      this.logFilePath = path.join(logDir, 'ambient.log');
+    }
+    return this.logFilePath;
+  }
 
-// Logging functions
-export function logInfo(message: string) {
-  if (isDebugMode()) {
-    const formatted = `[INFO] ${message}`;
-    outputChannel.appendLine(formatted);
-    appendToDisk(formatted);
+  private appendToDisk(message: string) {
+    if (!this.isDebugMode()) return;
+
+    const timestamp = new Date().toISOString();
+    fs.appendFileSync(this.getLogFilePath(), `[${timestamp}] ${message}\n`);
+  }
+
+  private writeToOutput(formatted: string) {
+    this.outputChannel.appendLine(formatted);
+    this.appendToDisk(formatted);
+  }
+
+  public debug(message: string) {
+    if (!this.isDebugMode()) return;
+    this.writeToOutput(`[DEBUG] ${message}`);
+  }
+
+  public info(message: string) {
+    if (this.isDebugMode()) {
+      this.writeToOutput(`[INFO] ${message}`);
+    }
+  }
+
+  public warn(message: string) {
+    if (this.isDebugMode()) {
+      this.writeToOutput(`[WARN] ${message}`);
+    }
+  }
+
+  public error(message: string, error?: unknown) {
+    this.writeToOutput(`[ERROR] ${message}`);
+
+    if (error instanceof Error) {
+      const errDetail = error.stack || error.message;
+      this.writeToOutput(errDetail);
+    } else if (typeof error === 'string') {
+      this.writeToOutput(error);
+    } else if (error) {
+      this.writeToOutput(JSON.stringify(error, null, 2));
+    }
+  }
+
+  public show() {
+    this.outputChannel.show();
   }
 }
 
-export function logWarn(message: string) {
-  if (isDebugMode()) {
-    const formatted = `[WARN] ${message}`;
-    outputChannel.appendLine(formatted);
-    appendToDisk(formatted);
-  }
-}
-
-export function logError(message: string, error?: unknown) {
-  const errorMsg = `[ERROR] ${message}`;
-  outputChannel.appendLine(errorMsg);
-  appendToDisk(errorMsg);
-
-  if (error instanceof Error) {
-    const errDetail = error.stack || error.message;
-    outputChannel.appendLine(errDetail);
-    appendToDisk(errDetail);
-  } else if (typeof error === 'string') {
-    outputChannel.appendLine(error);
-    appendToDisk(error);
-  } else if (error) {
-    const objStr = JSON.stringify(error, null, 2);
-    outputChannel.appendLine(objStr);
-    appendToDisk(objStr);
-  }
-}
-
-export function showOutput() {
-  outputChannel.show();
-}
+// Singleton export
+export const logger =  Logger.getInstance();

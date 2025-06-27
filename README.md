@@ -5,10 +5,9 @@
 
 ---
 
-## 🆕 Version 1.2.44
+## 🆕 Version 1.2.46
 
-Ambient music starts automatically with your project, and gently switches tracks every 30 minutes to keep your flow alive.
-
+Ambient music starts automatically with your project and seamlessly transitions to a new track every 30 minutes (by default) to keep you in the zone.
 ---
 
 ## ✨ Features

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { serverSingleton } from './serverManager';
 import { registerCommands } from './commands';
 import { webSocketSingleton } from './webSocketManager';
+import {logger} from './utils/logger';
 
 let hasInitialized = false;
 
@@ -11,19 +12,19 @@ let hasInitialized = false;
  */
 export function activate(context: vscode.ExtensionContext) {
   if (hasInitialized) {
-    console.warn('[Ambient Music] Extension already initialized.');
+    logger.debug('[Ambient Music] Extension already initialized.');
     return;
   }
 
   hasInitialized = true;
-  console.log('[Ambient Music] Activating extension...');
+  logger.debug('[Ambient Music] Activating extension...');
 
   serverSingleton.start(context);
   registerCommands(context);
 
   vscode.workspace.onDidChangeWorkspaceFolders(() => {
     if (vscode.workspace.workspaceFolders?.length === 0) {
-      console.log('[Ambient Music] All workspaces closed. Shutting down.');
+      logger.debug('[Ambient Music] All workspaces closed. Shutting down.');
       deactivate(); 
     }
   });
@@ -33,6 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
  * Called when the extension is deactivated
  */
 export function deactivate() {
+  
   serverSingleton.stop();
   webSocketSingleton.shutdown();
 }

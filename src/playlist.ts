@@ -1,8 +1,7 @@
 
 export const defaultPlaylist = [
+  "https://www.youtube.com/embed/n61ULEU7CO0?enablejsapi=1",
   "https://www.youtube.com/embed/jfKfPfyJRdk?enablejsapi=1",
-  "https://www.youtube.com/embed/DWcJFNfaw9c?enablejsapi=1",
-  "https://www.youtube.com/embed/kgx4WGK0oNU?enablejsapi=1"
 ];
 
 let userPlaylist: string[] = [];
@@ -33,7 +32,7 @@ export function getCurrentTrack(): string {
 
 let currentTrackIndex = 0;
 
-export function nextTrack(): string {
+export function getNextTrack(): string {
   const list = getPlaylist();
   currentTrackIndex = (currentTrackIndex + 1) % list.length;
   return getCurrentTrack();

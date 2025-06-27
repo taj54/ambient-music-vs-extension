@@ -1,24 +1,26 @@
 import * as vscode from 'vscode';
 import { webSocketSingleton } from './webSocketManager';
 import { updateUserPlaylist } from './playlist';
-import { getExtensionConfig } from './utils/config';
+import { logger } from './utils/logger';
 
 export function registerCommands(context: vscode.ExtensionContext) {
-  const { preferredPort } = getExtensionConfig();
 
   const sendCommand = (command: string, label: string) => {
     const client = webSocketSingleton.getClient();
     if (client && client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify({ command }));
+      logger.debug(`${label} command sent.`)
       vscode.window.showInformationMessage(`${label} command sent.`);
     } else {
+      logger.debug(`'⚠ No connected client.'`);
       vscode.window.showWarningMessage('⚠ No connected client.');
     }
   };
 
-  const openCommand = vscode.commands.registerCommand('ambientMusic.open', () => {
-    const url = `http://localhost:${preferredPort}`;
-    vscode.env.openExternal(vscode.Uri.parse(url));
+  const openCommand = vscode.commands.registerCommand('ambientMusic.openTab', () => {
+    //write a proper tab opening in incocnito which already a `utils\browser` have 
+    // sent through the command from here to do the tab opening 
+  
   });
 
   const playCommand = vscode.commands.registerCommand('ambientMusic.play', () =>
@@ -47,8 +49,10 @@ export function registerCommands(context: vscode.ExtensionContext) {
 
       if (urls.length > 0) {
         updateUserPlaylist(urls);
+          logger.debug(`🎶 Playlist updated with ${urls.length} video(s).`);
         vscode.window.showInformationMessage(`🎶 Playlist updated with ${urls.length} video(s).`);
       } else {
+        logger.debug('❌ No valid URLs entered.');
         vscode.window.showWarningMessage('❌ No valid URLs entered.');
       }
     }

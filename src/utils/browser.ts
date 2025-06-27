@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { exec } from 'child_process';
+import { logger } from './logger';
 
 let isTabOpen = false;
 
@@ -34,7 +35,7 @@ function buildLaunchCommand(url: string, chrome: string, platform: string): stri
 //         // macOS: AppleScript to activate VS Code
 //         exec(`osascript -e 'tell application "Visual Studio Code" to activate'`, err => {
 //             if (err) {
-//                 console.error('❌ Failed to refocus VS Code on macOS:', err);
+//                 logger.error('❌ Failed to refocus VS Code on macOS:', err);
 //             }
 //         });
 //     } else if (platform === 'win32') {
@@ -56,7 +57,7 @@ function buildLaunchCommand(url: string, chrome: string, platform: string): stri
 //         const encoded = Buffer.from(psScript, 'utf16le').toString('base64');
 //         exec(`powershell -EncodedCommand ${encoded}`, err => {
 //             if (err) {
-//                 console.error('❌ Failed to refocus VS Code on Windows:', err);
+//                 logger.error('❌ Failed to refocus VS Code on Windows:', err);
 //             }
 //         });
 //     }
@@ -71,6 +72,7 @@ export function openInIncognito(url: string) {
 
     if (!chrome) {
         vscode.window.showWarningMessage(`Unsupported platform for incognito mode: ${platform}`);
+        logger.debug(`Unsupported platform for incognito mode: ${platform}`);
         return;
     }
 
@@ -79,7 +81,7 @@ export function openInIncognito(url: string) {
     exec(cmd, { shell: 'cmd.exe', windowsHide: true }, err => {
         if (err) {
             vscode.window.showErrorMessage('❌ Failed to open browser in incognito mode.');
-            console.error(err);
+            logger.error('❌ Failed to open browser in incognito mode.',err) ;         
         } else {
             isTabOpen = true;
             // Try to refocus VS Code after 3s
