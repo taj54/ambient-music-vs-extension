@@ -115,7 +115,7 @@ MIT License © 2025 [Taj](https://github.com/taj54)
 ## 💬 Credits
 
 - Default music stream by [Lofi Girl](https://www.youtube.com/@lofigirl)
--- Built with ❤️ by [Taj](https://github.com/taj54)
+- Built with ❤️ by [Taj](https://github.com/taj54)
 
 ## 🧰 Developer Guide
 
