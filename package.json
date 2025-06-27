@@ -3,7 +3,7 @@
   "displayName": "Ambient Music AutoPlayer by Taj",
   "icon": "media/logo.png",
   "description": "Auto-play ambient music when a VS Code project opens.",
-  "version": "1.2.46",
+  "version": "1.2.47",
   "publisher": "taj154dev",
   "repository": {
     "type": "git",
