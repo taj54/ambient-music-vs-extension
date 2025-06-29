@@ -1,23 +1,23 @@
 import * as vscode from 'vscode';
 import { WebSocketServer, WebSocket } from 'ws';
-import { getNextTrack } from './playlist';
-import { tryOpenTab, markTabOpen, markTabClosed, isTabCurrentlyOpen } from './utils/browser';
-import { handleWebSocketConnection } from './server';
-import { logger } from './utils/logger';
+import { playlistManager } from './playlistManager';
+import { tryOpenTab, isTabCurrentlyOpen } from '../utils/browser';
+import { handleWebSocketConnection } from '../server';
+import { logger } from '../utils/logger';
 
-class webSocketManager {
-  private static instance: webSocketManager;
+class WebSocketManager {
+  private static instance: WebSocketManager;
   private wss: WebSocketServer | undefined;
   private connectedClient: WebSocket | undefined;
   private tabWasManuallyClosed: boolean = false;
 
   private constructor() { }
 
-  public static getInstance(): webSocketManager {
-    if (!webSocketManager.instance) {
-      webSocketManager.instance = new webSocketManager();
+  public static getInstance(): WebSocketManager {
+    if (!WebSocketManager.instance) {
+      WebSocketManager.instance = new WebSocketManager();
     }
-    return webSocketManager.instance;
+    return WebSocketManager.instance;
   }
 
   public getServer(): WebSocketServer | undefined {
@@ -57,7 +57,7 @@ class webSocketManager {
 
   public startRotation(clientUrl: string, intervalMinutes: number) {
     setInterval(() => {
-      const next = getNextTrack();
+      const next = playlistManager.getNextTrack();
 
       if (this.connectedClient?.readyState === WebSocket.OPEN) {
         this.connectedClient.send(JSON.stringify({ command: 'switch', url: next }));
@@ -117,4 +117,4 @@ class webSocketManager {
   }
 }
 
-export const webSocketSingleton = webSocketManager.getInstance();
+export const webSocketManager = WebSocketManager.getInstance();

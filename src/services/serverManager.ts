@@ -1,14 +1,10 @@
-
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { logger } from './utils/logger';
-import { getExtensionConfig } from './utils/config';
-import { loadUserPlaylistFromConfig } from './playlist';
-import { tryOpenTab } from './utils/browser';
-import { webSocketSingleton } from './webSocketManager';
-import { createWebServer } from './server';
+import { logger, getExtensionConfig, tryOpenTab } from '../utils';
+import { playlistManager, webSocketManager } from '.';
+import { createWebServer } from '../server';
 
 const LOCK_FILE = path.join(os.tmpdir(), 'ambient-music-extension.lock');
 
@@ -16,7 +12,7 @@ export class ServerManager {
   private static instance: ServerManager;
   private server: ReturnType<typeof createWebServer> | undefined;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): ServerManager {
     if (!ServerManager.instance) {
@@ -30,7 +26,7 @@ export class ServerManager {
     this.createLockFile();
 
     const config = getExtensionConfig();
-    loadUserPlaylistFromConfig(config.playlist);
+    playlistManager.updateUserPlaylist(config.playlist);
 
     this.server = createWebServer(context.extensionPath);
     this.server.listen(config.preferredPort, () => {
@@ -39,9 +35,8 @@ export class ServerManager {
       const clientUrl = `http://localhost:${port}?port=${port}`;
 
       logger.debug(`[Ambient Music] Server running at ${clientUrl}`);
-      logger.debug(`[Ambient Music] Server running at ${clientUrl}`);
 
-      const wsManager = webSocketSingleton;
+      const wsManager = webSocketManager;
       wsManager.setup(this.server!, clientUrl);
       wsManager.startRotation(clientUrl, config.switchIntervalMinutes);
       wsManager.trySendPlay(5, 1000);
@@ -65,10 +60,10 @@ export class ServerManager {
 
   private isAlreadyRunning(): boolean {
     if (fs.existsSync(LOCK_FILE)) {
-      logger.debug('[Ambient Music] Another instance is already active.');
       vscode.window.showWarningMessage(
         'Ambient Music Extension is already running in another VS Code window.'
       );
+      logger.debug('[Ambient Music] Another instance is already active.');
       return true;
     }
     return false;
@@ -95,4 +90,4 @@ export class ServerManager {
   }
 }
 
-export const serverSingleton = ServerManager.getInstance();
+export const serverManager = ServerManager.getInstance();

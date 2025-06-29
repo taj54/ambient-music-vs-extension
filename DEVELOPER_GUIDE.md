@@ -7,7 +7,8 @@
 
 ---
 
-## 🆕 Version 1.2.47
+
+## Guide
 
 This guide helps you **set up**, **build**, **test**, and **contribute** to the Ambient Music AutoPlayer extension for Visual Studio Code.
 
@@ -171,7 +172,3 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ---
 
-## 🔗 Credits
-
-- Default music from [Lofi Girl](https://www.youtube.com/@lofigirl)
-- Built with ❤️ by [Taj](https://github.com/taj54)

@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
-import { webSocketSingleton } from './webSocketManager';
-import { updateUserPlaylist } from './playlist';
-import { logger } from './utils/logger';
+import { webSocketManager, playlistManager, fileManager, serverManager } from './services';
+import { logger } from './utils';
+import { initializeExtension } from './extension';
 
 export function registerCommands(context: vscode.ExtensionContext) {
 
   const sendCommand = (command: string, label: string) => {
-    const client = webSocketSingleton.getClient();
+    const client = webSocketManager.getClient();
     if (client && client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify({ command }));
       logger.debug(`${label} command sent.`)
@@ -18,9 +18,8 @@ export function registerCommands(context: vscode.ExtensionContext) {
   };
 
   const openCommand = vscode.commands.registerCommand('ambientMusic.openTab', () => {
-    //write a proper tab opening in incocnito which already a `utils\browser` have 
-    // sent through the command from here to do the tab opening 
-  
+    console.log('start')
+    initializeExtension(context);
   });
 
   const playCommand = vscode.commands.registerCommand('ambientMusic.play', () =>
@@ -44,12 +43,12 @@ export function registerCommands(context: vscode.ExtensionContext) {
     if (input) {
       const urls = input
         .split(',')
-        .map(url => url.trim())
+        .map(url => ({ 'title': '', 'url': url.trim(), 'tags': [], 'channel': { 'name': '', 'url': '' } }))
         .filter(Boolean);
 
       if (urls.length > 0) {
-        updateUserPlaylist(urls);
-          logger.debug(`🎶 Playlist updated with ${urls.length} video(s).`);
+        playlistManager.updateUserPlaylist(urls);
+        logger.debug(`🎶 Playlist updated with ${urls.length} video(s).`);
         vscode.window.showInformationMessage(`🎶 Playlist updated with ${urls.length} video(s).`);
       } else {
         logger.debug('❌ No valid URLs entered.');
@@ -60,6 +59,9 @@ export function registerCommands(context: vscode.ExtensionContext) {
 
   const closeTabCommand = vscode.commands.registerCommand('ambientMusic.closeTab', () => {
     sendCommand('close_tab', '❌ Close Tab');
+    serverManager.stop();
+    webSocketManager.shutdown();
+
   });
 
 

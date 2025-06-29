@@ -3,9 +3,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { IncomingMessage, ServerResponse } from 'http';
-import { getCurrentTrack } from '../playlist'; 
-import { getMimeType } from '../utils/mime';
-import { logger } from '../utils/logger';
+import { playlistManager } from '../services';
+import { getMimeType, logger } from '../utils';
 
 /**
  * Handles incoming HTTP requests based on the requested URL.
@@ -50,8 +49,7 @@ function serveClientHtml(extensionPath: string, res: ServerResponse): void {
       res.end('Internal Server Error');
       return;
     }
-
-    const html = data.replace(/{{VIDEO_URL}}/g, getCurrentTrack());
+    const html = data.replace(/{{VIDEO_URL}}/g, playlistManager.getCurrentTrack());
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(html);
     logger.debug('Served client.html successfully.');

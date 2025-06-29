@@ -1,40 +1,42 @@
 import * as vscode from 'vscode';
-import { serverSingleton } from './serverManager';
+import { fileManager, playlistManager, serverManager, webSocketManager } from './services';
 import { registerCommands } from './commands';
-import { webSocketSingleton } from './webSocketManager';
-import {logger} from './utils/logger';
+import { logger } from './utils';
+import { getExtensionConfig } from './utils';
 
-let hasInitialized = false;
+export function initializeExtension(context: vscode.ExtensionContext) {
 
+  logger.debug('[Ambient Music] Initializing Ambient Music Extension...');
 
-/**
- * Called when the extension is activated
- */
-export function activate(context: vscode.ExtensionContext) {
-  if (hasInitialized) {
-    logger.debug('[Ambient Music] Extension already initialized.');
-    return;
-  }
-
-  hasInitialized = true;
-  logger.debug('[Ambient Music] Activating extension...');
-
-  serverSingleton.start(context);
-  registerCommands(context);
+  fileManager.initialize(context);
+  serverManager.start(context);
+  playlistManager.loadPlaylistWhenReady();
 
   vscode.workspace.onDidChangeWorkspaceFolders(() => {
     if (vscode.workspace.workspaceFolders?.length === 0) {
       logger.debug('[Ambient Music] All workspaces closed. Shutting down.');
-      deactivate(); 
+      deactivate();
     }
   });
 }
 
 /**
- * Called when the extension is deactivated
+ * VS Code will call this once when the extension is activated (if activationEvents trigger it)
  */
-export function deactivate() {
+export function activate(context: vscode.ExtensionContext) {
+  const { autoPlayOnStartup } = getExtensionConfig();
+  console.log('Extension activated. autoPlayOnStartup:', autoPlayOnStartup);
+
+
+  registerCommands(context);
   
-  serverSingleton.stop();
-  webSocketSingleton.shutdown();
+  if (autoPlayOnStartup) {
+    console.log('starting up')
+    initializeExtension(context);
+  }
+}
+
+export function deactivate() {
+  serverManager.stop();
+  webSocketManager.shutdown();
 }

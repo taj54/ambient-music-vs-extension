@@ -1,6 +1,6 @@
 import * as http from 'http';
 import { handleRequest } from './routes';
-import { logger } from '../utils/logger';
+import { logger } from '../utils';
 
 /**
  * Initializes and returns a configured HTTP server instance for the Ambient Music Extension.
