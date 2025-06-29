@@ -35,24 +35,17 @@ export function registerCommands(context: vscode.ExtensionContext) {
   );
 
   const setPlaylistCommand = vscode.commands.registerCommand('ambientMusic.setPlaylist', async () => {
-    const input = await vscode.window.showInputBox({
-      prompt: 'Enter YouTube URLs (comma-separated)',
-      placeHolder: 'https://youtu.be/video1, https://youtu.be/video2',
+    const tags = playlistManager.getAvailableTags();
+    const picked = await vscode.window.showQuickPick(tags, {
+      placeHolder: 'Choose a tag to filter playlist',
     });
-
-    if (input) {
-      const urls = input
-        .split(',')
-        .map(url => ({ 'title': '', 'url': url.trim(), 'tags': [], 'channel': { 'name': '', 'url': '' } }))
-        .filter(Boolean);
-
-      if (urls.length > 0) {
-        playlistManager.updateUserPlaylist(urls);
-        logger.debug(`🎶 Playlist updated with ${urls.length} video(s).`);
-        vscode.window.showInformationMessage(`🎶 Playlist updated with ${urls.length} video(s).`);
+    if (picked) {
+      const filtered = playlistManager.filterByOptions({ tag: picked });
+      if (filtered.length > 0) {
+        playlistManager.updateUserPlaylist(filtered);
+        vscode.window.showInformationMessage(`🎶 Filtered playlist with ${filtered.length} video(s) tagged "${picked}".`);
       } else {
-        logger.debug('❌ No valid URLs entered.');
-        vscode.window.showWarningMessage('❌ No valid URLs entered.');
+        vscode.window.showWarningMessage(`⚠️ No videos found with tag "${picked}".`);
       }
     }
   });
@@ -63,6 +56,12 @@ export function registerCommands(context: vscode.ExtensionContext) {
     webSocketManager.shutdown();
 
   });
+  const resetCommand = vscode.commands.registerCommand('ambientMusic.resetPlaylist', () => {
+    playlistManager.resetPlaylist();
+    vscode.window.showInformationMessage('🎵 Playlist has been reset to the default.');
+  });
+  context.subscriptions.push(resetCommand);
+
 
 
   context.subscriptions.push(
@@ -71,6 +70,7 @@ export function registerCommands(context: vscode.ExtensionContext) {
     pauseCommand,
     resumeCommand,
     setPlaylistCommand,
-    closeTabCommand
+    closeTabCommand,
+    resetCommand
   );
 }

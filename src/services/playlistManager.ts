@@ -1,5 +1,6 @@
+import { filterPlaylist, PlaylistFilterOptions } from "../filters";
 import { PlaylistItem } from "../interfaces";
-import { toEmbedUrl } from "../utils";
+import { logger, toEmbedUrl } from "../utils";
 import { validatePlaylist } from "../validators";
 import { fileManager } from "./fileManager";
 
@@ -10,6 +11,7 @@ class PlaylistManager {
   private embedUrls: string[] = [];
   private currentTrackIndex = 0;
   private isInitialized = false;
+  private isUserHavePlaylist = false;
 
   private constructor() { }
 
@@ -21,11 +23,13 @@ class PlaylistManager {
   }
 
   private ensureInitialized() {
-    if (!this.isInitialized) {
+    if (this.isInitialized) return;
+
+    if (!this.isUserHavePlaylist) {
       const playlist = this.loadPlaylistFromFile();
       this.initializePlaylist(playlist);
-      this.isInitialized = true;
     }
+    this.isInitialized = true;
   }
 
   private loadPlaylistFromFile(): PlaylistItem[] {
@@ -47,9 +51,18 @@ class PlaylistManager {
 
   private initializePlaylist(data: PlaylistItem[]) {
     this.richUserPlaylist = data;
-    // console.log( this.richUserPlaylist)
+    console.log(this.richUserPlaylist);
+
     this.embedUrls = data.map(item => toEmbedUrl(item.url));
     this.currentTrackIndex = 0;
+  }
+  
+  public resetPlaylist(): void {
+    const defaultPlaylist = this.loadPlaylistFromFile();
+    this.isUserHavePlaylist = false;
+    this.isInitialized = true;
+    this.initializePlaylist(defaultPlaylist);
+   logger.debug("✅ Playlist has been reset to default.");
   }
 
 
@@ -78,11 +91,23 @@ class PlaylistManager {
   }
 
   public updateUserPlaylist(data: PlaylistItem[]): void {
-    console.log(data); 
+
     const validated = validatePlaylist(data);
-    console.log(validated);
+    this.isInitialized = true;
+    this.isUserHavePlaylist = true;
     this.initializePlaylist(validated);
   }
+  public filterByOptions(filters: PlaylistFilterOptions): PlaylistItem[] {
+    return filterPlaylist(this.richUserPlaylist, filters);
+  }
+
+  public getAvailableTags(): string[] {
+    const allTags = this.richUserPlaylist.flatMap(item => item.tags || []);
+    const uniqueTags = [...new Set(allTags.map(tag => tag.trim().toLowerCase()))];
+    return uniqueTags.sort();
+
+  }
+
 }
 
 export const playlistManager = PlaylistManager.getInstance();
