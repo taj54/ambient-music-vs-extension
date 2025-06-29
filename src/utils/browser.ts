@@ -17,7 +17,7 @@ function buildLaunchCommand(url: string, chrome: string, platform: string): stri
     const baseFlags = ['--incognito'];
 
     if (platform === 'win32') {
-        const flags = [...baseFlags, `--new-window`, `--app=${url}`,`--start-minimized`];
+        const flags = [...baseFlags, `--new-window`, `--app=${url}`, `--start-minimized`];
         return `start "" ${chrome} ${flags.join(' ')}`;
     }
 
@@ -25,43 +25,7 @@ function buildLaunchCommand(url: string, chrome: string, platform: string): stri
     return `${chrome} ${baseFlags.join(' ')} "${url}"`;
 }
 
-// TODO this piece of code induse some unexpected behaviour from chrome tab in windows
-/**
- * Refocus VS Code window (macOS & Windows).
- */
-// function refocusVSCode() {
-//     const platform = process.platform;
-//     if (platform === 'darwin') {
-//         // macOS: AppleScript to activate VS Code
-//         exec(`osascript -e 'tell application "Visual Studio Code" to activate'`, err => {
-//             if (err) {
-//                 logger.error('❌ Failed to refocus VS Code on macOS:', err);
-//             }
-//         });
-//     } else if (platform === 'win32') {
-//         // Windows: Powershell to refocus VS Code window using EncodedCommand
-//         const psScript = `
-//       $codeProc = Get-Process -Name "Code" -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1
-//       if ($codeProc) {
-//         Add-Type @"
-//         using System;
-//         using System.Runtime.InteropServices;
-//         public class User32 {
-//           [DllImport("user32.dll")]
-//           public static extern bool SetForegroundWindow(IntPtr hWnd);
-//         }
-// "@
-//         [User32]::SetForegroundWindow($codeProc.MainWindowHandle)
-//       }
-//     `;
-//         const encoded = Buffer.from(psScript, 'utf16le').toString('base64');
-//         exec(`powershell -EncodedCommand ${encoded}`, err => {
-//             if (err) {
-//                 logger.error('❌ Failed to refocus VS Code on Windows:', err);
-//             }
-//         });
-//     }
-// }
+// TODO
 
 /**
  * Launches Chrome in incognito mode with optional background behavior.
@@ -81,7 +45,7 @@ export function openInIncognito(url: string) {
     exec(cmd, { shell: 'cmd.exe', windowsHide: true }, err => {
         if (err) {
             vscode.window.showErrorMessage('❌ Failed to open browser in incognito mode.');
-            logger.error('❌ Failed to open browser in incognito mode.',err) ;         
+            logger.error('❌ Failed to open browser in incognito mode.', err);
         } else {
             isTabOpen = true;
             // Try to refocus VS Code after 3s
@@ -95,9 +59,13 @@ export function openInIncognito(url: string) {
  */
 export function tryOpenTab(url: string) {
     if (!isTabOpen) {
+        logger.debug('🔵 Opening browser tab for the first time.');
         openInIncognito(url);
+    } else {
+        logger.debug('⚠️ Browser tab already open. Skipping.');
     }
 }
+
 
 export function markTabOpen() {
     isTabOpen = true;

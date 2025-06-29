@@ -18,7 +18,6 @@ export function registerCommands(context: vscode.ExtensionContext) {
   };
 
   const openCommand = vscode.commands.registerCommand('ambientMusic.openTab', () => {
-    console.log('start')
     initializeExtension(context);
   });
 
@@ -31,7 +30,7 @@ export function registerCommands(context: vscode.ExtensionContext) {
   );
 
   const resumeCommand = vscode.commands.registerCommand('ambientMusic.resume', () =>
-    sendCommand('resume', '▶ Resume')
+    sendCommand('resume', '⏯  Resume')
   );
 
   const setPlaylistCommand = vscode.commands.registerCommand('ambientMusic.setPlaylist', async () => {
@@ -54,6 +53,7 @@ export function registerCommands(context: vscode.ExtensionContext) {
     sendCommand('close_tab', '❌ Close Tab');
     serverManager.stop();
     webSocketManager.shutdown();
+
 
   });
   const resetCommand = vscode.commands.registerCommand('ambientMusic.resetPlaylist', () => {

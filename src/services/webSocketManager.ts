@@ -1,9 +1,8 @@
 import * as vscode from 'vscode';
 import { WebSocketServer, WebSocket } from 'ws';
 import { playlistManager } from './playlistManager';
-import { tryOpenTab, isTabCurrentlyOpen } from '../utils/browser';
+import { tryOpenTab, isTabCurrentlyOpen,logger,sendTrackCommand } from '../utils';
 import { handleWebSocketConnection } from '../server';
-import { logger } from '../utils/logger';
 
 class WebSocketManager {
   private static instance: WebSocketManager;
@@ -58,13 +57,7 @@ class WebSocketManager {
   public startRotation(clientUrl: string, intervalMinutes: number) {
     setInterval(() => {
       const next = playlistManager.getNextTrack();
-
-      if (this.connectedClient?.readyState === WebSocket.OPEN) {
-        this.connectedClient.send(JSON.stringify({ command: 'switch', url: next }));
-        vscode.window.showInformationMessage('🎵 Switched to next track.');
-      } else {
-        vscode.window.showWarningMessage('⚠️ No active WebSocket client to switch track.');
-      }
+      sendTrackCommand('switch', next)
 
       if (!isTabCurrentlyOpen() && this.connectedClient === undefined) {
         if (!this.tabWasManuallyClosed) {

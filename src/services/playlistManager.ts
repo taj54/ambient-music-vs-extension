@@ -3,6 +3,7 @@ import { PlaylistItem } from "../interfaces";
 import { logger, toEmbedUrl } from "../utils";
 import { validatePlaylist } from "../validators";
 import { fileManager } from "./fileManager";
+import { sendTrackCommand } from "../utils";
 
 class PlaylistManager {
   private static instance: PlaylistManager;
@@ -56,13 +57,15 @@ class PlaylistManager {
     this.embedUrls = data.map(item => toEmbedUrl(item.url));
     this.currentTrackIndex = 0;
   }
-  
+
   public resetPlaylist(): void {
     const defaultPlaylist = this.loadPlaylistFromFile();
     this.isUserHavePlaylist = false;
     this.isInitialized = true;
     this.initializePlaylist(defaultPlaylist);
-   logger.debug("✅ Playlist has been reset to default.");
+
+    const firstTrackUrl = this.getCurrentTrack();
+    sendTrackCommand('set_playlist', firstTrackUrl)
   }
 
 
@@ -91,12 +94,17 @@ class PlaylistManager {
   }
 
   public updateUserPlaylist(data: PlaylistItem[]): void {
-
     const validated = validatePlaylist(data);
     this.isInitialized = true;
     this.isUserHavePlaylist = true;
     this.initializePlaylist(validated);
+
+    const firstTrackUrl = this.getCurrentTrack();
+    sendTrackCommand('switch', firstTrackUrl)
+
   }
+
+
   public filterByOptions(filters: PlaylistFilterOptions): PlaylistItem[] {
     return filterPlaylist(this.richUserPlaylist, filters);
   }

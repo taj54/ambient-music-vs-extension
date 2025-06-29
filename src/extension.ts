@@ -29,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 
   registerCommands(context);
-  
+
   if (autoPlayOnStartup) {
     console.log('starting up')
     initializeExtension(context);
