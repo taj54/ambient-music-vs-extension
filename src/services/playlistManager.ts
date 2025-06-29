@@ -1,9 +1,8 @@
 import { filterPlaylist, PlaylistFilterOptions } from "../filters";
 import { PlaylistItem } from "../interfaces";
-import { logger, toEmbedUrl } from "../utils";
+import { toEmbedUrl,sendTrackCommand } from "../utils";
 import { validatePlaylist } from "../validators";
 import { fileManager } from "./fileManager";
-import { sendTrackCommand } from "../utils";
 
 class PlaylistManager {
   private static instance: PlaylistManager;
@@ -52,8 +51,6 @@ class PlaylistManager {
 
   private initializePlaylist(data: PlaylistItem[]) {
     this.richUserPlaylist = data;
-    console.log(this.richUserPlaylist);
-
     this.embedUrls = data.map(item => toEmbedUrl(item.url));
     this.currentTrackIndex = 0;
   }

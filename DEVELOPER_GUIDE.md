@@ -117,7 +117,7 @@ These settings can be customized in your VS Code `settings.json`.
 
 | Setting Key                                | Type      | Default | Description                                                                                      |
 |-------------------------------------------|-----------|---------|--------------------------------------------------------------------------------------------------|
-| `ambientMusic.autoPlayOnStartup`          | `boolean` | `false` | Automatically start ambient music when VS Code launches.                                         |
+| `ambientMusic.autoPlayOnStartup`          | `boolean` | `true` | Automatically start ambient music when VS Code launches.                                         |
 | `ambientMusic.port`                       | `number`  | `3303`  | Port for the WebSocket server. Set to `0` for dynamic port allocation.                          |
 | `ambientMusic.switchIntervalMinutes`      | `number`  | `30`    | Time interval (in minutes) to automatically switch to the next video in the playlist.           |
 | `ambientMusic.debug`                      | `boolean` | `false` | Enables verbose debug logging for easier troubleshooting.                                        |
