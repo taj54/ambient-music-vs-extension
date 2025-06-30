@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <title>Ambient Music</title>
@@ -14,42 +13,55 @@
 
   <script>
     const queryParams = new URLSearchParams(window.location.search);
-    const port = queryParams.get("port");
+    const port = queryParams.get("port") || 3303;
     const socket = new WebSocket(`ws://localhost:${port}`);
 
     let player;
     let commandQueue = [];
 
-    // Inject YouTube API
+    // ✅ Register as browser tab
+    socket.addEventListener('open', () => {
+      console.log('[Client] WebSocket connected');
+      socket.send(JSON.stringify({ type: 'register', client: 'browser' }));
+    });
+
+    // ✅ Handle WebSocket messages
+    socket.addEventListener('message', (event) => {
+      const data = JSON.parse(event.data);
+      if (!player || typeof player.playVideo !== 'function') {
+        commandQueue.push(data);
+        return;
+      }
+      handleCommand(data);
+    });
+
+    socket.addEventListener('close', () => {
+      console.warn('[Client] WebSocket closed');
+    });
+
+    socket.addEventListener('error', (err) => {
+      console.error('[Client] WebSocket error:', err);
+    });
+
+    // ✅ Inject YouTube API
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
 
     window.onYouTubeIframeAPIReady = function () {
-      const initialVideoId = extractVideoID("{{VIDEO_URL}}");
-
+      const initialVideoId = extractVideoID("{{VIDEO_URL}}") || "5qap5aO4i9A"; // fallback lofi
       player = new YT.Player('player', {
         height: '315',
         width: '560',
         videoId: initialVideoId,
         playerVars: { autoplay: 1, mute: 1 },
         events: {
-          onReady: () => flushQueuedCommands()
+          onReady: () => {
+            console.log('[Client] YouTube player ready');
+            flushQueuedCommands();
+          }
         }
       });
-    };
-
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-
-
-
-      // Normal command flow
-      if (!player || typeof player.playVideo !== 'function') {
-        commandQueue.push(data);
-        return;
-      }
-      handleCommand(data);
     };
 
     function flushQueuedCommands() {
@@ -59,19 +71,19 @@
     }
 
     function handleCommand({ command, url }) {
+      const vid = extractVideoID(url);
       switch (command) {
         case 'play':
         case 'resume':
-          player.playVideo();
+          player?.playVideo();
           break;
         case 'pause':
-          player.pauseVideo();
+          player?.pauseVideo();
           break;
         case 'unmute':
-          player.unMute();
+          player?.unMute();
           break;
         case 'switch':
-          const vid = extractVideoID(url);
           if (vid) {
             player.loadVideoById(vid);
             player.playVideo();
@@ -82,14 +94,12 @@
           window.close();
           break;
       }
-
     }
 
     function extractVideoID(url) {
-      const match = url.match(/(?:embed\/|v=|youtu\.be\/)([\w-]{11})/);
+      const match = url?.match(/(?:embed\/|v=|youtu\.be\/|v=)([\w-]{11})/);
       return match ? match[1] : null;
     }
   </script>
 </body>
-
 </html>

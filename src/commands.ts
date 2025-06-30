@@ -60,6 +60,8 @@ export function registerCommands(context: vscode.ExtensionContext) {
     playlistManager.resetPlaylist();
     vscode.window.showInformationMessage('🎵 Playlist has been reset to the default.');
   });
+
+
   context.subscriptions.push(resetCommand);
 
 

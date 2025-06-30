@@ -1,24 +1,34 @@
 import { WebSocket } from 'ws';
-import { markTabClosed, markTabOpen, tryOpenTab,logger } from '../utils';
+import { logger,tabState } from '../utils';
 import { webSocketManager } from '../services';
-
 
 export function handleWebSocketConnection(ws: WebSocket, clientUrl: string): void {
   logger.debug(`Client connected via WebSocket: ${clientUrl}`);
 
   webSocketManager.setClient(ws);
-  markTabOpen();
+  tabState.markOpen(); 
   webSocketManager.resetManualCloseFlag();
 
   ws.on('message', msg => {
     logger.debug(`Received WebSocket message: ${msg}`);
     try {
       const data = JSON.parse(msg.toString());
+
+      // ✅ Handle client registration
+      if (data.type === 'register' && data.client === 'browser') {
+        logger.debug('✅ Browser tab registered via WebSocket.');
+        webSocketManager.setClient(ws);
+        tabState.markOpen(); 
+        return;
+      }
+
+      // ✅ Handle normal command
       if (data.command === 'clientClosed') {
         logger.debug('Client sent "clientClosed" command.');
-        markTabClosed();
+        tabState.markClosed(); // Replaces markTabClosed()
         webSocketManager.setManualCloseFlag(true);
       }
+
     } catch (e) {
       logger.error('WebSocket message error:', e);
     }
@@ -27,11 +37,10 @@ export function handleWebSocketConnection(ws: WebSocket, clientUrl: string): voi
   ws.on('close', () => {
     logger.debug('WebSocket client disconnected.');
     webSocketManager.setClient(undefined);
-    markTabClosed();
+    tabState.markClosed(); 
 
     if (!webSocketManager.wasManuallyClosed()) {
       logger.debug('Tab was not manually closed — attempting to reopen.');
-      tryOpenTab(clientUrl);
       webSocketManager.trySendPlay();
     } else {
       logger.debug('Tab was manually closed — will not auto-reopen.');

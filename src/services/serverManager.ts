@@ -22,29 +22,48 @@ export class ServerManager {
   }
 
   public start(context: vscode.ExtensionContext): void {
-    if (this.isAlreadyRunning()) return;
-    this.createLockFile();
+    const isPrimary = !this.isAlreadyRunning();
+    if (isPrimary) {
+      this.createLockFile();
+    }
 
     const config = getExtensionConfig();
-    playlistManager.updateUserPlaylist(config.playlist);
 
-    this.server = createWebServer(context.extensionPath);
-    this.server.listen(config.preferredPort, () => {
-      const address = this.server?.address();
-      const port = typeof address === 'object' && address?.port ? address.port : config.preferredPort;
-      const clientUrl = `http://localhost:${port}?port=${port}`;
+    if (isPrimary) {
+      this.server = createWebServer(context.extensionPath);
+      this.server.listen(config.preferredPort, () => {
+        const address = this.server?.address();
+        if (typeof address !== 'object' || !address?.port) {
+          logger.error('[Ambient Music] Failed to resolve valid port. Aborting launch.');
+          return;
+        }
 
-      logger.debug(`[Ambient Music] Server running at ${clientUrl}`);
+        const port = address.port;
+        const clientUrl = `http://localhost:${port}?port=${port}`;
+        logger.debug(`[Ambient Music] Server running at ${clientUrl}`);
 
-      const wsManager = webSocketManager;
-      wsManager.setup(this.server!, clientUrl);
-      wsManager.startRotation(clientUrl, config.switchIntervalMinutes);
-      wsManager.trySendPlay(5, 1000);
+        const wsManager = webSocketManager;
+        wsManager.setup(this.server!, clientUrl);
+        wsManager.startRotation(config.switchIntervalMinutes);
 
-      tryOpenTab(clientUrl);
-    });
+        // ✅ Delay tab open slightly to allow WebSocket client to load
+        setTimeout(() => {
+          tryOpenTab(clientUrl);
+          wsManager.trySendPlay(5, 1000);
+          if (config.playlist.length > 0) {
 
-    context.subscriptions.push({ dispose: () => this.stop() });
+            playlistManager.updateUserPlaylist(config.playlist);
+          }
+
+        }, 1000); // 1 second delay ensures port is open
+      });
+
+      context.subscriptions.push({ dispose: () => this.stop() });
+    } else {
+      logger.debug('[Ambient Music] Secondary window detected — not starting server.');
+    }
+
+
   }
 
   public stop(): void {
@@ -60,9 +79,6 @@ export class ServerManager {
 
   private isAlreadyRunning(): boolean {
     if (fs.existsSync(LOCK_FILE)) {
-      vscode.window.showWarningMessage(
-        'Ambient Music Extension is already running in another VS Code window.'
-      );
       logger.debug('[Ambient Music] Another instance is already active.');
       return true;
     }

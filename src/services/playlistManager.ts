@@ -90,14 +90,15 @@ class PlaylistManager {
       : null;
   }
 
-  public updateUserPlaylist(data: PlaylistItem[]): void {
+  public  updateUserPlaylist(data: PlaylistItem[]): void {
     const validated = validatePlaylist(data);
     this.isInitialized = true;
     this.isUserHavePlaylist = true;
     this.initializePlaylist(validated);
 
     const firstTrackUrl = this.getCurrentTrack();
-    sendTrackCommand('switch', firstTrackUrl)
+     sendTrackCommand('switch', firstTrackUrl)
+    
 
   }
 
