@@ -12,13 +12,36 @@
   "engines": {
     "vscode": "^1.80.0"
   },
+  "keywords": [
+    "ambient",
+    "music",
+    "audio",
+    "focus",
+    "relaxation",
+    "vs-code",
+    "vscode-extension",
+    "background music",
+    "autoplay",
+    "productivity",
+    "youtube playlist",
+    "taj",
+    "taj154dev",
+    "nature sounds",
+    "rain sounds",
+    "forest",
+    "lofi",
+    "chill",
+    "vs music player"
+  ],
+  "categories": [
+    "Other"
+  ],
   "main": "./dist/src/extension.js",
   "activationEvents": [
     "onStartupFinished"
   ],
   "contributes": {
     "commands": [
-
       {
         "command": "ambientMusic.setPlaylist",
         "title": "ambient-taj: 🎶 Set Playlist (Rain, Forest, Ocean...)"
