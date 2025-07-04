@@ -4,6 +4,12 @@ All notable changes for each version of the Ambient Music extension.
 
 ---
 
+## [v1.3.5] - 2025-07-05
+
+### ✨ Added
+- **package.json**
+   -keywords enhanced for better visibility in vs code market place
+
 ## [v1.3.4] - 2025-06-30
 
 ### ✨ Added
