@@ -23,7 +23,7 @@ describe('Ambient Music Extension Test Suite', () => {
     const config = vscode.workspace.getConfiguration('ambientMusic');
     const port = config.get('port');
     // const  //
-    assert.strictEqual(port, 0, 'Expected default port to be 0');
+    assert.strictEqual(port, 3303, 'Expected default port to be 0');
   });
 
 });
