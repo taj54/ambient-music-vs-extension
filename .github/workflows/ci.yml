@@ -7,15 +7,18 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
-    - name: Install Dependencies
-      run: npm install
-    - name: Run Tests
-      run: npm test
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm ci  
+
+      - name: Run Tests
+        run: npm test
 
   deploy:
     needs: build
@@ -23,12 +26,18 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
-    - name: Install vsce
-      run: npm install -g vsce
-    - name: Publish to VS Code Marketplace
-      run: vsce publish -p ${{ secrets.VSCE_TOKEN }}
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm ci  
+
+      - name: Install vsce
+        run: npm install -g vsce
+
+      - name: Publish to VS Code Marketplace
+        run: vsce publish -p ${{ secrets.VSCE_TOKEN }}
