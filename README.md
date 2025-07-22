@@ -151,7 +151,7 @@ Special thanks to these amazing YouTube creators whose music powers the ambient 
 
 ## 🧰 Developer Guide
 
-If you're interested in contributing or modifying this extension, check out the [**DEVELOPER_GUIDE.md**](./DEVELOPER_GUIDE.md) for setup instructions, architecture overview, packaging guide, and testing tips.
+If you're interested in contributing or modifying this extension, check out the [**DEVELOPER GUIDE**](./DEVELOPER.md) for setup instructions, architecture overview, packaging guide, and testing tips.
 
 ---
 
