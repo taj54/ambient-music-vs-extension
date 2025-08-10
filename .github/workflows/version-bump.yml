@@ -3,8 +3,8 @@ name: Version Bump
 on:
   workflow_dispatch:
     inputs:
-      type:
-        description: 'Type of version bump (patch, minor, major)'
+      release_type:
+        description: 'Select version bump type'
         required: true
         default: 'patch'
         type: choice
@@ -14,40 +14,58 @@ on:
           - major
 
 jobs:
-  bump:
+  bump-version:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetch all history for npm version to work
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+          run_install: false
+
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          node-version: 18
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
-      - name: Bump version
-        id: bump
+      - name: Generate new version
+        id: version
         run: |
-          npm version ${{ github.event.inputs.type }} --no-git-tag-version
-          echo "new_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+          NEW_VERSION=$(pnpm version ${{ inputs.release_type }} --no-git-tag-version | awk '{print $NF}')
+          echo "new_version=$NEW_VERSION" >> $GITHUB_ENV
 
-      - name: Create Version Commit
+      - name: Create new branch
         run: |
-          git add package.json
-          git commit -m "chore: bump version to ${{ steps.bump.outputs.new_version }}"
+          git checkout -b release/${{ env.new_version }}
 
-      - name: Create Tag
-        run: git tag v${{ steps.bump.outputs.new_version }}
+      - name: Commit & Push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json pnpm-lock.yaml
+          git commit -m "chore(release): bump version to ${{ env.new_version }}"
+          git push origin release/${{ env.new_version }}
 
-      - name: Push changes
-        run: git push origin main --tags
+      - name: Create Pull Request
+        run: |
+          gh pr create \
+            --base main \
+            --head release/${{ env.new_version }} \
+            --title "Release: ${{ env.new_version }}" \
+            --body "Auto-generated release PR for version ${{ env.new_version }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify about Major Release (if major)
+        if: inputs.release_type == 'major'
+        run: |
+          echo "🚨 Major version update detected! Please review and merge manually."
