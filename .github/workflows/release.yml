@@ -29,4 +29,4 @@ jobs:
         uses: HaaLeo/publish-vscode-extension@v1
         with:
           pat: ${{ secrets.VSCE_PAT }}
-          extensionFile: ambient-music-vs-extension-${{ github.event.release.tag_name }}.vsix 
+          extensionFile: ambient-music-vs-extension/ambient-music-vs-extension-${{ github.event.release.tag_name }}.vsix 
