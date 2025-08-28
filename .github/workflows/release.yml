@@ -10,20 +10,19 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          node-version: '20'
-
-      - name: Install pnpm
-        run: npm install -g pnpm
+          version: 10.15.0
+          run_install: false
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Build extension
+      - name: Package extension
         run: pnpm run build
 
       - name: Publish to VS Code Marketplace
