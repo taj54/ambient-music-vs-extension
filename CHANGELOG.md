@@ -4,6 +4,13 @@ All notable changes for each version of the Ambient Music extension.
 
 ---
 
+## v1.4.0 2025-08-28
+
+### Changed
+
+- add GitHub Actions workflow for tagging and releasing
+- remove dist folder from .vscodeignore
+
 ## v1.3.15 2025-08-28
 
 ## v1.3.11 2025-08-28
