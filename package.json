@@ -5,8 +5,8 @@
   "description": "Auto-play ambient music when a VS Code project",
   "version": "1.3.10",
   "publisher": "taj154dev",
-  "author":"Taj",
-  "license":"MIT",
+  "author": "Taj",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/taj54/ambient-music-vs-extension.git"
@@ -116,15 +116,16 @@
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "^24.0.4",
+    "@types/sinon": "^17.0.4",
     "@types/vscode": "^1.80.0",
     "@types/ws": "^8.18.1",
     "@vscode/test-electron": "^2.5.2",
     "chai": "^5.2.0",
     "glob": "^11.0.3",
     "mocha": "^11.7.1",
+    "sinon": "^21.0.0",
     "ts-node": "^10.9.2",
     "tsup": "^8.5.0",
-    
     "vsce": "^2.15.0",
     "vscode-test": "^1.6.1"
   },

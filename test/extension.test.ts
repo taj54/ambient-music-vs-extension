@@ -1,8 +1,22 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
+import * as sinon from 'sinon';
+import { fileManager } from '../src/services/fileManager';
 
 describe('Ambient Music Extension Test Suite', () => {
   vscode.window.showInformationMessage('Start all tests.');
+
+  let readMediaFileStub: sinon.SinonStub;
+  let consoleErrorStub: sinon.SinonStub;
+
+  beforeEach(() => {
+    readMediaFileStub = sinon.stub(fileManager, 'readMediaFile').returns('[]');
+    consoleErrorStub = sinon.stub(console, 'error');
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
 
   it('Sample test: Extension should be present', async () => {
     const extension = vscode.extensions.getExtension('taj154dev.ambient-music-vs-extension');
