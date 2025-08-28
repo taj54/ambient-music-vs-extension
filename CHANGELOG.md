@@ -4,6 +4,8 @@ All notable changes for each version of the Ambient Music extension.
 
 ---
 
+## v1.3.15 2025-08-28
+
 ## v1.3.11 2025-08-28
 
 ### Added
