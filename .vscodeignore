@@ -4,7 +4,6 @@
 .github/
 .pnpm-store/
 node_modules/
-dist/
 src/
 test/
 *.map
