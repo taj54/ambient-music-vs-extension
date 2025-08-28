@@ -105,10 +105,9 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "tsup",
-    "compile": "tsup",
+    "build": "tsup",
     "watch": "tsup --watch",
-    "test": "pnpm run compile && node ./dist/test/runTest.js"
+    "test": "pnpm run build && node ./dist/test/runTest.js"
   },
   "packageManager": "pnpm@10.15.0",
   "devDependencies": {
