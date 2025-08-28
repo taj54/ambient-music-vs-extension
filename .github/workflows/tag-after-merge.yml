@@ -83,7 +83,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.version }}
-          name: "Release v${{ env.version }}"
+          name: v${{ env.version }}
           body: ${{ env.notes }}
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
