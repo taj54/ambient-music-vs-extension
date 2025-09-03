@@ -4,6 +4,13 @@ All notable changes for each version of the Ambient Music extension.
 
 ---
 
+## v1.5.2 2025-09-03
+
+### Changed
+
+- update universal-version-bump to v0.13.2
+- bump version to 1.5.1
+
 ## v1.5.0 2025-08-28
 
 ### Changed
