@@ -19,5 +19,5 @@ export default defineConfig({
  */
     `,
   },
-  external: ['vscode', 'mocha'],
+  external: ['vscode', 'mocha', 'ws'],
 });
