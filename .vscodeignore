@@ -1,18 +1,29 @@
-.vscode-test/
+# Exclude dev and editor files
 .vscode/
+.vscode-test/
 .git/
 .github/
 .pnpm-store/
-node_modules/
+
+# Exclude source and tests (only ship compiled dist/)
 src/
 test/
+
+# Exclude configs not needed at runtime
+tsconfig.json
+tsup.config.ts
+*.tsbuildinfo
+
+# Exclude build/debug artifacts
 *.map
-*.ts
 *.js.map
 *.vsix
 *.log
-.DS_Store
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Exclude OS junk
+.DS_Store
+Thumbs.db
