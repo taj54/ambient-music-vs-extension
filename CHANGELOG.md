@@ -4,6 +4,14 @@ All notable changes for each version of the Ambient Music extension.
 
 ---
 
+## v1.7.0 2025-09-03
+
+### Changed
+
+- update dependencies and build process
+- //github.com/taj54/ambient-music-vs-extension
+- change release trigger to published
+
 ## v1.6.0 2025-09-03
 
 ### Changed
