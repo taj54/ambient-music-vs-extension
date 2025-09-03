@@ -4,6 +4,16 @@ All notable changes for each version of the Ambient Music extension.
 
 ---
 
+## v1.6.0 2025-09-03
+
+### Changed
+
+- add ws to external dependencies
+- Merge pull request #10 from taj54/version-bump/v1.5.2
+- bump version to v1.5.2
+- update universal-version-bump to v0.13.2
+- bump version to 1.5.1
+
 ## v1.5.2 2025-09-03
 
 ### Changed
