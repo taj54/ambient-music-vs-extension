@@ -3,7 +3,7 @@
   "displayName": "Ambient Music AutoPlayer by Taj",
   "icon": "media/logo.png",
   "description": "Auto-play ambient music when a VS Code project",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "publisher": "taj154dev",
   "author": "Taj",
   "license": "MIT",
@@ -105,9 +105,9 @@
     }
   },
   "scripts": {
-    "build": "pnpm run compile && vsce package --no-dependencies",
-    "compile": "tsup",
-    "watch": "tsup --watch",
+    "build": "pnpm run compile && pnpm exec  vsce package --no-dependencies",
+    "compile": "pnpm exec tsup",
+    "watch": "pnpm exec tsup --watch",
     "test": "pnpm run compile && node ./dist/test/runTest.js"
   },
   "packageManager": "pnpm@10.15.0",
@@ -120,16 +120,20 @@
     "@types/vscode": "^1.80.0",
     "@types/ws": "^8.18.1",
     "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.6.0",
     "chai": "^5.2.0",
     "glob": "^11.0.3",
     "mocha": "^11.7.1",
     "sinon": "^21.0.0",
     "ts-node": "^10.9.2",
     "tsup": "^8.5.0",
-    "vsce": "^2.15.0",
     "vscode-test": "^1.6.1"
   },
   "dependencies": {
-    "ws": "^8.18.2"
+    "ws": "8.11.0"
+  },
+  "optionalDependencies": {
+    "bufferutil": "4.0.6",
+    "utf-8-validate": "5.0.10"
   }
 }

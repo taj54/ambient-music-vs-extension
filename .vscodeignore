@@ -1,18 +1,46 @@
+# -------------------------
+# VS Code / Test Artifacts
+# -------------------------
 .vscode-test/
 .vscode/
+
+# -------------------------
+# Git / GitHub Metadata
+# -------------------------
 .git/
 .github/
+
+# -------------------------
+# Package Manager Stores
+# -------------------------
 .pnpm-store/
-node_modules/
+
+# -------------------------
+# Build / Source / Test
+# -------------------------
 src/
 test/
+dist/test/
+
+# -------------------------
+# File Types to Ignore
+# -------------------------
 *.map
 *.ts
 *.js.map
 *.vsix
 *.log
 .DS_Store
+
+# -------------------------
+# Debug / Error Logs
+# -------------------------
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# -------------------------
+# ✅ Allow node_modules
+# -------------------------
+!node_modules/**
