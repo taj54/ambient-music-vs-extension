@@ -3,7 +3,7 @@ name: Release
 
 on: 
   release:
-    types: [published]
+    types: [created]
   workflow_dispatch:
 
 jobs:
@@ -12,19 +12,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
         with:
-          version: 10.15.0
-          run_install: false
-
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-
-      - name: Package extension
-        run: pnpm run build
+          fetch-depth: 0
 
       - name: Publish to VS Code Marketplace
         uses: HaaLeo/publish-vscode-extension@v2
