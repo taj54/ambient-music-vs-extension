@@ -115,8 +115,7 @@ export class SidebarController implements vscode.WebviewViewProvider {
   </div>
   <div class="controls">
     <button id="previous" title="Previous track">|&lt;</button>
-    <button id="play" title="Play">Play</button>
-    <button id="pause" title="Pause">Pause</button>
+    <button id="playPause" title="Play" aria-label="Play">▶</button>
     <button id="next" title="Next track">&gt;|</button>
   </div>
   <div class="range-row">
@@ -136,6 +135,7 @@ export class SidebarController implements vscode.WebviewViewProvider {
   <script>
     const vscode = acquireVsCodeApi();
     const post = (command, extra = {}) => vscode.postMessage({ command, ...extra });
+    let isPlaying = false;
     const formatTime = value => {
       const seconds = Math.max(0, Math.floor(value || 0));
       return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
@@ -143,8 +143,8 @@ export class SidebarController implements vscode.WebviewViewProvider {
 
     document.getElementById('previous').onclick = () => post('previous');
     document.getElementById('next').onclick = () => post('next');
-    document.getElementById('play').onclick = () => post('play');
-    document.getElementById('pause').onclick = () => post('pause');
+    const playPause = document.getElementById('playPause');
+    playPause.onclick = () => post(isPlaying ? 'pause' : 'play');
     document.getElementById('mute').onclick = () => post('mute');
     document.getElementById('openPlayer').onclick = () => post('openPlayer');
     document.getElementById('volume').oninput = event => post('set_volume', { value: Number(event.target.value) });
@@ -155,6 +155,10 @@ export class SidebarController implements vscode.WebviewViewProvider {
     window.addEventListener('message', event => {
       if (event.data.type === 'playerStatus') {
         const status = event.data.status;
+        isPlaying = status.state === 1;
+        playPause.textContent = isPlaying ? '⏸' : '▶';
+        playPause.title = isPlaying ? 'Pause' : 'Play';
+        playPause.setAttribute('aria-label', playPause.title);
         const progress = document.getElementById('progress');
         const time = document.getElementById('time');
         const volume = document.getElementById('volume');
