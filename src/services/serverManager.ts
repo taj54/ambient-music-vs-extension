@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as net from 'net';
 import * as vscode from 'vscode';
-import { logger, getExtensionConfig, tryOpenTab } from '../utils';
+import { logger, getExtensionConfig, openInIncognito, tryOpenTab } from '../utils';
 import { playlistManager, webSocketManager } from '.';
 import { createWebServer } from '../server';
 
@@ -23,11 +23,16 @@ export class ServerManager {
   }
 
   public start(context: vscode.ExtensionContext): void {
-    void this.startIfPrimary(context);
+    void this.startIfPrimary(context, false);
   }
 
-  private async startIfPrimary(context: vscode.ExtensionContext): Promise<void> {
-    const isPrimary = !(await this.isAlreadyRunning());
+  public openPlayer(context: vscode.ExtensionContext): void {
+    void this.startIfPrimary(context, true);
+  }
+
+  private async startIfPrimary(context: vscode.ExtensionContext, openPlayer: boolean): Promise<void> {
+    const runningPort = await this.getRunningPort();
+    const isPrimary = runningPort === undefined;
     const config = getExtensionConfig();
 
     if (isPrimary) {
@@ -50,7 +55,11 @@ export class ServerManager {
 
         // ✅ Delay tab open slightly to allow WebSocket client to load
         setTimeout(() => {
-          tryOpenTab(clientUrl);
+          if (openPlayer) {
+            openInIncognito(clientUrl, false);
+          } else {
+            tryOpenTab(clientUrl);
+          }
           wsManager.trySendPlay(5, 1000);
           if (config.playlist.length > 0) {
 
@@ -63,6 +72,9 @@ export class ServerManager {
       context.subscriptions.push({ dispose: () => this.stop() });
     } else {
       logger.debug('[Ambient Music] Secondary window detected — not starting server.');
+      if (openPlayer && runningPort) {
+        openInIncognito(`http://localhost:${runningPort}?port=${runningPort}`, false);
+      }
     }
 
 
@@ -79,30 +91,23 @@ export class ServerManager {
     }
   }
 
-  private async isAlreadyRunning(): Promise<boolean> {
-    if (!fs.existsSync(LOCK_FILE)) return false;
+  private async getRunningPort(): Promise<number | undefined> {
+    if (!fs.existsSync(LOCK_FILE)) return undefined;
 
     try {
       const raw = fs.readFileSync(LOCK_FILE, 'utf8').trim();
-      let port: number | undefined;
-
-      try {
-        const lock = JSON.parse(raw) as { port?: number };
-        port = lock.port;
-      } catch {
-        port = undefined;
-      }
-
-      if (port && await this.canConnect(port)) {
+      const lock = JSON.parse(raw) as { port?: number };
+      const port = lock.port;
+      if (typeof port === 'number' && await this.canConnect(port)) {
         logger.debug('[Ambient Music] Another instance is already active.');
-        return true;
+        return port;
       }
     } catch (err) {
       logger.error('[Ambient Music] Failed to validate the instance lock:', err);
     }
 
     this.removeLockFile();
-    return false;
+    return undefined;
   }
 
   private canConnect(port: number): Promise<boolean> {

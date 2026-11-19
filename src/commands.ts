@@ -18,7 +18,7 @@ export function registerCommands(context: vscode.ExtensionContext) {
   };
 
   const openCommand = vscode.commands.registerCommand('ambientMusic.openTab', () => {
-    initializeExtension(context);
+    initializeExtension(context, true);
   });
 
   const playCommand = vscode.commands.registerCommand('ambientMusic.play', () =>

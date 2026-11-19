@@ -54,7 +54,10 @@ export class SidebarController implements vscode.WebviewViewProvider {
     });
 
     webviewView.onDidChangeVisibility(() => {
-      if (webviewView.visible) webSocketManager.send({ command: 'get_status' });
+      if (webviewView.visible) {
+        webSocketManager.send({ command: 'get_status' });
+        void vscode.commands.executeCommand('ambientMusic.openTab');
+      }
     });
 
     webSocketManager.send({ command: 'get_status' });

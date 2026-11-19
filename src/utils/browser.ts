@@ -9,16 +9,17 @@ const chromePaths: Record<'win32' | 'darwin' | 'linux', string> = {
   linux: `google-chrome`,
 };
 
-function buildLaunchCommand(url: string, chrome: string, platform: string): string {
+function buildLaunchCommand(url: string, chrome: string, platform: string, minimized: boolean): string {
   const baseFlags = ['--incognito'];
   if (platform === 'win32') {
-    const flags = [...baseFlags, '--new-window', `--app=${url}`, '--start-minimized'];
+    const flags = [...baseFlags, '--new-window', `--app=${url}`];
+    if (minimized) flags.push('--start-minimized');
     return `start "" ${chrome} ${flags.join(' ')}`;
   }
   return `${chrome} ${baseFlags.join(' ')} "${url}"`;
 }
 
-export function openInIncognito(url: string) {
+export function openInIncognito(url: string, minimized = true) {
   const platform = process.platform as 'win32' | 'darwin' | 'linux';
   const chrome = chromePaths[platform];
 
@@ -28,7 +29,7 @@ export function openInIncognito(url: string) {
     return;
   }
 
-  const cmd = buildLaunchCommand(url, chrome, platform);
+  const cmd = buildLaunchCommand(url, chrome, platform, minimized);
 
   exec(cmd, { shell: 'cmd.exe', windowsHide: true }, err => {
     if (err) {

@@ -4,15 +4,24 @@ import { registerCommands } from './commands';
 import { logger, getExtensionConfig, tabState } from './utils';
 import { SidebarController } from './sidebarController';
 
+let playlistLoaded = false;
+
 /**
  * Initializes all extension services if autoPlay is enabled.
  */
-export function initializeExtension(context: vscode.ExtensionContext) {
+export function initializeExtension(context: vscode.ExtensionContext, openPlayer = false) {
   logger.debug('[Ambient Music] Initializing Ambient Music Extension...');
 
   fileManager.initialize(context);
-  serverManager.start(context);
-  playlistManager.loadPlaylistWhenReady();
+  if (openPlayer) {
+    serverManager.openPlayer(context);
+  } else {
+    serverManager.start(context);
+  }
+  if (!playlistLoaded) {
+    playlistManager.loadPlaylistWhenReady();
+    playlistLoaded = true;
+  }
 
 }
 
