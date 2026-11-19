@@ -20,9 +20,15 @@ Automatic playback is enabled by default. Chrome must be installed for the playe
 
 - Start ambient music when VS Code launches.
 - Rotate through tracks every 30 minutes by default.
-- Play, pause, resume, or reopen the player from the Command Palette.
+- Control playback from the Ambient Music sidebar or the Command Palette.
 - Filter the playlist by tag or provide your own playlist in settings.
 - Avoid launching duplicate players when multiple VS Code windows are open.
+
+### Sidebar controls
+
+Select the music-note icon in the VS Code Activity Bar to open the Ambient Music sidebar. The sidebar shows the current track and playlist, with controls to play or pause, skip tracks, seek, and adjust volume. Select the speaker icon to mute or unmute; muting sets the volume to zero, and unmuting restores the previous volume.
+
+Use the small browser icon in the sidebar header to open or close the player window. Opening the sidebar also opens the player.
 
 ## Commands
 
