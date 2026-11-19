@@ -47,9 +47,6 @@ export class SidebarController implements vscode.WebviewViewProvider {
         case 'seek':
           webSocketManager.send({ command: message.command, url: message.value });
           break;
-        case 'openPlayer':
-          vscode.commands.executeCommand('ambientMusic.openTab');
-          break;
       }
     });
 
@@ -204,18 +201,6 @@ export class SidebarController implements vscode.WebviewViewProvider {
       font-size: 9px; cursor: pointer; padding: 0;
     }
     .icon-button:hover { background: var(--vscode-toolbar-hoverBackground); }
-    .open-player {
-      width: 100%; height: 34px; margin-top: 10px;
-      border: 1px solid color-mix(in srgb, var(--vscode-foreground) 10%, transparent);
-      border-radius: 8px;
-      background: color-mix(in srgb, var(--vscode-foreground) 4%, transparent);
-      cursor: pointer; font-size: 11px; font-weight: 600;
-      transition: background .15s ease, border-color .15s ease;
-    }
-    .open-player:hover {
-      border-color: color-mix(in srgb, var(--vscode-focusBorder) 55%, transparent);
-      background: var(--vscode-toolbar-hoverBackground);
-    }
     .playlist-section { margin-top: 14px; }
     .playlist-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -303,7 +288,6 @@ export class SidebarController implements vscode.WebviewViewProvider {
       <button class="icon-button" id="mute" title="Mute">Mute</button>
     </div>
 
-    <button class="open-player" id="openPlayer">Open full player</button>
   </main>
 
   <section class="playlist-section">
@@ -328,7 +312,6 @@ export class SidebarController implements vscode.WebviewViewProvider {
     const playPause = document.getElementById('playPause');
     playPause.onclick = () => post(isPlaying ? 'pause' : 'play');
     document.getElementById('mute').onclick = () => post('mute');
-    document.getElementById('openPlayer').onclick = () => post('openPlayer');
     document.getElementById('volume').oninput = event => post('set_volume', { value: Number(event.target.value) });
     document.getElementById('progress').onchange = event => post('seek', { value: Number(event.target.value) });
     document.querySelectorAll('.track').forEach(button => {
