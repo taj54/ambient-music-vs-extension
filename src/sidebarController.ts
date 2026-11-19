@@ -78,8 +78,14 @@ export class SidebarController implements vscode.WebviewViewProvider {
     const current = playlistManager.getCurrentTrackMetadata();
     const items = playlist.map((item, index) =>
       `<button class="track${current?.title === item.title ? ' active' : ''}" data-index="${index}">
-        <span class="track-title">${this.escapeHtml(item.title)}</span>
-        ${item.channel?.name ? `<span class="track-channel">${this.escapeHtml(item.channel.name)}</span>` : ''}
+        <span class="track-number">${String(index + 1).padStart(2, '0')}</span>
+        <span class="track-copy">
+          <span class="track-title">${this.escapeHtml(item.title)}</span>
+          ${item.channel?.name ? `<span class="track-channel">${this.escapeHtml(item.channel.name)}</span>` : ''}
+        </span>
+        <span class="active-mark" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </span>
       </button>`
     ).join('');
 
@@ -90,47 +96,210 @@ export class SidebarController implements vscode.WebviewViewProvider {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     :root { color-scheme: dark; }
-    body { padding: 10px; font-family: var(--vscode-font-family); color: var(--vscode-foreground); }
-    h2 { font-size: 13px; margin: 0 0 10px; }
-    .current { margin-bottom: 10px; }
-    .current-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-    button, input { box-sizing: border-box; }
-    .controls button, #openPlayer { width: 100%; border: 1px solid var(--vscode-button-border, transparent); background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); height: 32px; cursor: pointer; }
-    .range-row { display: grid; grid-template-columns: 52px 1fr 52px; align-items: center; gap: 6px; margin: 10px 0; }
-    input[type="range"] { width: 100%; accent-color: var(--vscode-progressBar-background); }
-    #playlist { display: flex; flex-direction: column; gap: 4px; max-height: 280px; overflow-y: auto; }
-    .track { text-align: left; border: 0; border-radius: 3px; padding: 7px; background: transparent; color: var(--vscode-foreground); cursor: pointer; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 12px;
+      font-family: var(--vscode-font-family);
+      color: var(--vscode-foreground);
+      background: var(--vscode-sideBar-background);
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 2px 2px 12px;
+    }
+    .brand { display: flex; align-items: center; gap: 8px; }
+    .brand-mark {
+      width: 28px; height: 28px; border-radius: 9px;
+      display: grid; place-items: center;
+      background: linear-gradient(145deg, color-mix(in srgb, var(--vscode-focusBorder) 82%, transparent), var(--vscode-button-background));
+      box-shadow: 0 7px 18px color-mix(in srgb, var(--vscode-focusBorder) 22%, transparent);
+      color: var(--vscode-button-foreground);
+      font-size: 13px;
+    }
+    .brand-name { font-size: 12px; font-weight: 700; letter-spacing: .02em; }
+    .status {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 10px; opacity: .72;
+    }
+    .status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--vscode-charts-green, #89d185);
+      box-shadow: 0 0 8px var(--vscode-charts-green, #89d185);
+    }
+    .player-card {
+      border: 1px solid color-mix(in srgb, var(--vscode-foreground) 9%, transparent);
+      border-radius: 14px;
+      padding: 14px;
+      background: linear-gradient(145deg,
+        color-mix(in srgb, var(--vscode-sideBar-background) 88%, var(--vscode-focusBorder) 12%),
+        var(--vscode-sideBar-background));
+      box-shadow: 0 10px 28px color-mix(in srgb, #000 12%, transparent);
+    }
+    .now-label {
+      margin-bottom: 7px;
+      font-size: 9px; font-weight: 700; letter-spacing: .16em;
+      text-transform: uppercase; opacity: .55;
+    }
+    .current-title {
+      min-height: 38px;
+      font-size: 14px; line-height: 1.35; font-weight: 650;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .controls {
+      display: grid; grid-template-columns: 40px 48px 40px;
+      justify-content: center; align-items: center; gap: 12px;
+      margin: 13px 0 10px;
+    }
+    .control {
+      height: 40px; border: 0; border-radius: 50%;
+      display: grid; place-items: center;
+      background: transparent; cursor: pointer;
+      transition: transform .15s ease, background .15s ease;
+    }
+    .control:hover { background: var(--vscode-toolbar-hoverBackground); transform: translateY(-1px); }
+    .control:active { transform: scale(.94); }
+    .control.primary {
+      height: 48px;
+      background: var(--vscode-button-background);
+      color: var(--vscode-button-foreground);
+      box-shadow: 0 8px 20px color-mix(in srgb, var(--vscode-button-background) 28%, transparent);
+    }
+    .control.primary:hover { background: var(--vscode-button-hoverBackground); }
+    .control svg { width: 18px; height: 18px; fill: currentColor; }
+    .progress-row { display: grid; grid-template-columns: 38px 1fr 38px; align-items: center; gap: 7px; }
+    .time { font-size: 9px; opacity: .68; text-align: center; font-variant-numeric: tabular-nums; }
+    input[type="range"] {
+      width: 100%; height: 3px; margin: 8px 0;
+      border-radius: 999px; cursor: pointer;
+      accent-color: var(--vscode-progressBar-background);
+    }
+    .volume-row {
+      display: grid; grid-template-columns: 18px 1fr 36px;
+      align-items: center; gap: 8px;
+      margin-top: 8px;
+    }
+    .volume-icon { width: 14px; opacity: .72; fill: currentColor; }
+    .icon-button {
+      height: 28px; border: 1px solid var(--vscode-button-border, transparent);
+      border-radius: 7px; background: transparent;
+      font-size: 9px; cursor: pointer; padding: 0;
+    }
+    .icon-button:hover { background: var(--vscode-toolbar-hoverBackground); }
+    .open-player {
+      width: 100%; height: 34px; margin-top: 10px;
+      border: 1px solid color-mix(in srgb, var(--vscode-foreground) 10%, transparent);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--vscode-foreground) 4%, transparent);
+      cursor: pointer; font-size: 11px; font-weight: 600;
+      transition: background .15s ease, border-color .15s ease;
+    }
+    .open-player:hover {
+      border-color: color-mix(in srgb, var(--vscode-focusBorder) 55%, transparent);
+      background: var(--vscode-toolbar-hoverBackground);
+    }
+    .playlist-section { margin-top: 14px; }
+    .playlist-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: 0 4px 7px;
+    }
+    .playlist-header h2 { margin: 0; font-size: 11px; }
+    .track-count {
+      min-width: 20px; height: 18px; padding: 0 6px;
+      display: grid; place-items: center;
+      border-radius: 999px; font-size: 9px;
+      background: color-mix(in srgb, var(--vscode-foreground) 7%, transparent);
+      opacity: .75;
+    }
+    #playlist {
+      display: flex; flex-direction: column; gap: 3px;
+      max-height: 280px; overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+    }
+    .track {
+      width: 100%; min-height: 48px;
+      display: grid; grid-template-columns: 24px minmax(0, 1fr) 18px;
+      align-items: center; gap: 7px;
+      text-align: left; border: 1px solid transparent; border-radius: 9px;
+      padding: 7px 8px;
+      background: transparent; color: var(--vscode-foreground); cursor: pointer;
+      transition: background .15s ease, border-color .15s ease;
+    }
     .track:hover { background: var(--vscode-list-hoverBackground); }
-    .track.active { background: var(--vscode-list-activeSelectionBackground); color: var(--vscode-list-activeSelectionForeground); }
-    .track-title, .track-channel { display: block; }
-    .track-title { font-size: 12px; }
-    .track-channel { margin-top: 2px; font-size: 10px; opacity: 0.75; }
+    .track.active {
+      border-color: color-mix(in srgb, var(--vscode-focusBorder) 34%, transparent);
+      background: color-mix(in srgb, var(--vscode-list-activeSelectionBackground) 62%, transparent);
+      color: var(--vscode-list-activeSelectionForeground);
+    }
+    .track-number { font-size: 9px; opacity: .42; font-variant-numeric: tabular-nums; }
+    .track-copy { min-width: 0; }
+    .track-title, .track-channel { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .track-title { font-size: 11px; font-weight: 550; }
+    .track-channel { margin-top: 3px; font-size: 9px; opacity: .58; }
+    .active-mark { display: none; height: 12px; align-items: flex-end; justify-content: center; gap: 2px; }
+    .active-mark i { width: 2px; border-radius: 2px; background: var(--vscode-focusBorder); animation: bounce 1s ease-in-out infinite alternate; }
+    .active-mark i:nth-child(1) { height: 5px; }
+    .active-mark i:nth-child(2) { height: 10px; animation-delay: -.35s; }
+    .active-mark i:nth-child(3) { height: 7px; animation-delay: -.65s; }
+    .track.active .active-mark { display: flex; }
+    .track.active .track-number { opacity: 0; }
+    @keyframes bounce { to { height: 3px; } }
+    @media (prefers-reduced-motion: reduce) { .active-mark i { animation: none; } }
   </style>
 </head>
 <body>
-  <h2>Ambient Music</h2>
-  <div class="current">
+  <div class="header">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">♪</div>
+      <span class="brand-name">Ambient Music</span>
+    </div>
+    <div class="status"><span class="status-dot"></span><span id="statusText">Ready</span></div>
+  </div>
+
+  <main class="player-card">
+    <div class="now-label">Now playing</div>
     <div class="current-title" id="currentTitle">${this.escapeHtml(current?.title || 'No track loaded')}</div>
-  </div>
-  <div class="controls">
-    <button id="previous" title="Previous track">|&lt;</button>
-    <button id="playPause" title="Play" aria-label="Play">▶</button>
-    <button id="next" title="Next track">&gt;|</button>
-  </div>
-  <div class="range-row">
-    <label for="progress">Time</label>
-    <input id="progress" type="range" min="0" max="100" value="0">
-    <span id="time">0:00</span>
-  </div>
-  <div class="range-row">
-    <label for="volume">Volume</label>
-    <input id="volume" type="range" min="0" max="100" value="100">
-    <button id="mute" title="Mute">Mute</button>
-  </div>
-  <button id="openPlayer">Open Player</button>
-  <h2>Playlist</h2>
-  <div id="playlist">${items}</div>
+
+    <div class="controls">
+      <button class="control" id="previous" title="Previous track" aria-label="Previous track">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+      </button>
+      <button class="control primary" id="playPause" title="Play" aria-label="Play">
+        <svg id="playIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <button class="control" id="next" title="Next track" aria-label="Next track">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 6h2v12h-2zM5 18l8.5-6L5 6z"/></svg>
+      </button>
+    </div>
+
+    <div class="progress-row">
+      <span class="time" id="elapsed">0:00</span>
+      <input id="progress" type="range" min="0" max="100" value="0" aria-label="Track progress">
+      <span class="time" id="time">0:00</span>
+    </div>
+
+    <div class="volume-row">
+      <svg class="volume-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3zm12.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 15.5 12zm-2.5-8v2.06a7 7 0 0 1 0 11.88V20a9 9 0 0 0 0-16z"/></svg>
+      <input id="volume" type="range" min="0" max="100" value="100" aria-label="Volume">
+      <button class="icon-button" id="mute" title="Mute">Mute</button>
+    </div>
+
+    <button class="open-player" id="openPlayer">Open full player</button>
+  </main>
+
+  <section class="playlist-section">
+    <div class="playlist-header">
+      <h2>Playlist</h2>
+      <span class="track-count">${playlist.length}</span>
+    </div>
+    <div id="playlist">${items}</div>
+  </section>
 
   <script>
     const vscode = acquireVsCodeApi();
@@ -156,17 +325,26 @@ export class SidebarController implements vscode.WebviewViewProvider {
       if (event.data.type === 'playerStatus') {
         const status = event.data.status;
         isPlaying = status.state === 1;
-        playPause.textContent = isPlaying ? '⏸' : '▶';
+        const playIcon = document.getElementById('playIcon');
+        if (playIcon) {
+          playIcon.innerHTML = isPlaying
+            ? '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>'
+            : '<path d="M8 5v14l11-7z"/>';
+        }
         playPause.title = isPlaying ? 'Pause' : 'Play';
         playPause.setAttribute('aria-label', playPause.title);
+        const statusText = document.getElementById('statusText');
+        if (statusText) statusText.textContent = isPlaying ? 'Playing' : 'Paused';
         const progress = document.getElementById('progress');
         const time = document.getElementById('time');
+        const elapsed = document.getElementById('elapsed');
         const volume = document.getElementById('volume');
         const mute = document.getElementById('mute');
         if (progress && status.duration > 0) {
           progress.value = String(Math.round(status.currentTime / status.duration * 100));
         }
-        if (time) time.textContent = formatTime(status.currentTime);
+        if (elapsed) elapsed.textContent = formatTime(status.currentTime);
+        if (time) time.textContent = formatTime(status.duration);
         if (volume && !volume.matches(':active')) volume.value = String(status.volume);
         if (mute) {
           mute.textContent = status.muted ? 'Unmute' : 'Mute';
@@ -175,6 +353,10 @@ export class SidebarController implements vscode.WebviewViewProvider {
       }
       if (event.data.type === 'currentTrack') {
         document.getElementById('currentTitle').textContent = event.data.title;
+        document.querySelectorAll('.track').forEach(button => {
+          const title = button.querySelector('.track-title');
+          button.classList.toggle('active', title?.textContent === event.data.title);
+        });
       }
     });
   </script>
