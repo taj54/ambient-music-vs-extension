@@ -53,14 +53,24 @@ export class SidebarController implements vscode.WebviewViewProvider {
       }
     });
 
-    webviewView.onDidChangeVisibility(() => {
+    let wasVisible = webviewView.visible;
+    const openPlayerWhenVisible = () => {
       if (webviewView.visible) {
         webSocketManager.send({ command: 'get_status' });
         void vscode.commands.executeCommand('ambientMusic.openTab');
       }
+    };
+    webviewView.onDidChangeVisibility(() => {
+      if (webviewView.visible && !wasVisible) {
+        openPlayerWhenVisible();
+      } else if (webviewView.visible) {
+        webSocketManager.send({ command: 'get_status' });
+      }
+      wasVisible = webviewView.visible;
     });
 
     webSocketManager.send({ command: 'get_status' });
+    if (wasVisible) openPlayerWhenVisible();
   }
 
   private sendTrack(url: string): void {
