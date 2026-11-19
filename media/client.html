@@ -127,6 +127,7 @@
     }
 
     function extractVideoID(url) {
+      if (typeof url !== 'string') return null;
       const match = url?.match(/(?:embed\/|v=|youtu\.be\/|v=)([\w-]{11})/);
       return match ? match[1] : null;
     }
