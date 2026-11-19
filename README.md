@@ -1,158 +1,110 @@
-# 🎵 Ambient Music AutoPlayer for VS Code
+# Ambient Music AutoPlayer for VS Code
 
-> **Inspiration**  
-> One day, I realized I had been feeling unproductive for several days. After a quick self-reflection, I discovered that watching TV series and movies in the background while coding was draining my focus and creativity. This insight inspired me to build a tool for myself—and for thousands of other developers who face similar distractions—to help us stay in the zone with relaxing ambient music.
+Bring a little calm to your coding sessions. Ambient Music AutoPlayer plays a curated ambient playlist while you work, with tracks rotating automatically so you can stay focused without managing the music yourself.
 
----
-## Badges
+[![Marketplace version](https://vsmarketplacebadges.dev/version-short/taj154dev.ambient-music-vs-extension.svg)](https://marketplace.visualstudio.com/items?itemName=taj154dev.ambient-music-vs-extension)
+[![Installs](https://vsmarketplacebadges.dev/installs-short/taj154dev.ambient-music-vs-extension.svg)](https://marketplace.visualstudio.com/items?itemName=taj154dev.ambient-music-vs-extension)
+[![Downloads](https://vsmarketplacebadges.dev/downloads-short/taj154dev.ambient-music-vs-extension.svg)](https://marketplace.visualstudio.com/items?itemName=taj154dev.ambient-music-vs-extension)
+[![Tests](https://github.com/taj54/ambient-music-vs-extension/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/taj54/ambient-music-vs-extension/actions/workflows/test.yml)
+[![License](https://img.shields.io/github/license/taj54/ambient-music-vs-extension)](LICENSE)
 
-[![Version](https://img.shields.io/visual-studio-marketplace/v/taj154dev.ambient-music-vs-extension)](https://marketplace.visualstudio.com/items?itemName=taj154dev.ambient-music-vs-extension)
-[![Installs](https://img.shields.io/visual-studio-marketplace/i/taj154dev.ambient-music-vs-extension)](https://marketplace.visualstudio.com/items?itemName=taj154dev.ambient-music-vs-extension)
-[![Downloads](https://img.shields.io/visual-studio-marketplace/d/taj154dev.ambient-music-vs-extension)](https://marketplace.visualstudio.com/items?itemName=taj154dev.ambient-music-vs-extension)
-[![License](https://img.shields.io/github/license/taj54/ambient-music-vs-extension)](https://github.com/taj54/ambient-music-vs-extension/blob/main/LICENSE)
-![TypeScript](https://img.shields.io/badge/built_with-TypeScript-3178c6?logo=typescript&logoColor=white)
+## Get started
 
----
+1. [Install Ambient Music AutoPlayer](https://marketplace.visualstudio.com/items?itemName=taj154dev.ambient-music-vs-extension).
+2. Open a workspace in VS Code.
+3. The extension starts the local player and opens it in a Chrome window.
 
-## 🎧 What It Does
+Automatic playback is enabled by default. Chrome must be installed for the player window to open. You can turn off automatic startup with the `ambientMusic.autoPlayOnStartup` setting.
 
-Ambient music starts automatically with your project and seamlessly transitions to a new track every 30 minutes (by default) to keep you in the zone.
+## Features
 
----
+- Start ambient music when VS Code launches.
+- Rotate through tracks every 30 minutes by default.
+- Play, pause, resume, or reopen the player from the Command Palette.
+- Filter the playlist by tag or provide your own playlist in settings.
+- Avoid launching duplicate players when multiple VS Code windows are open.
 
-## ✨ Features
+## Commands
 
-- ✅ Automatically plays ambient music when a workspace is opened
-- ✅ Rotates to a new track every 30 minutes (configurable)
-- ✅ Prevents multiple instances with singleton design
-- ✅ Supports reconnecting WebSocket clients
-- ✅ Manual play/pause/resume via Command Palette
-- ✅ Easily set your own playlist via command
-- ✅ Manually close the tab via `Ambient Music: ❌ Close Tab` command
-- ✅ No configuration required for default usage
+Open the Command Palette with `Ctrl+Shift+P` on Windows/Linux or `Cmd+Shift+P` on macOS, then search for one of these commands:
 
----
+| Command | What it does |
+| --- | --- |
+| `ambient-taj: 🌐 Open Ambient Music Player` | Opens the player. |
+| `ambient-taj: ▶️ Play Ambient Music` | Starts playback. |
+| `ambient-taj: ⏸️ Pause Music` | Pauses playback. |
+| `ambient-taj: ⏯ Resume Music` | Resumes playback. |
+| `ambient-taj: 🎶 Set Playlist (Rain, Forest, Ocean...)` | Filters the playlist by a tag. |
+| `ambient-taj: 🔄 Reset Playlist to Default` | Restores the default playlist. |
+| `ambient-taj: ❌ Close Music Player` | Closes the player and stops its local server. |
 
-## 🚀 How to Use
+## Settings
 
-### Automatic Playback
+These settings are available in VS Code Settings or your `settings.json`:
 
-1. Install the extension from Marketplace
-2. Open any folder/project in VS Code
-3. A browser tab will auto-launch playing ambient music
-4. You'll receive a confirmation notification
+| Setting | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ambientMusic.autoPlayOnStartup` | `boolean` | `true` | Start ambient music when VS Code launches. |
+| `ambientMusic.port` | `number` | `3303` | Local server port. Set to `0` to choose an available port automatically. |
+| `ambientMusic.switchIntervalMinutes` | `number` | `30` | Minutes between playlist rotations. |
+| `ambientMusic.debug` | `boolean` | `false` | Enable verbose logging in the Ambient Music output channel. |
+| `ambientMusic.playlist` | `array` | `[]` | Use a custom playlist. Each item needs a title, YouTube watch URL, tags, and channel details. |
 
-### Manual Controls
+### Custom playlist example
 
-Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and search for:
-
-
-| Command ID                      | Title                                                  | Description                            |
-|--------------------------------|---------------------------------------------------------|----------------------------------------|
-| `ambientMusic.setPlaylist`     | 🎶 Set Playlist (Rain, Forest, Ocean...)               | Choose or define a relaxing playlist   |
-| `ambientMusic.openTab`         | 🌐 Open Ambient Music Player                            | Opens the embedded music player tab    |
-| `ambientMusic.play`            | ▶️ Play Ambient Music                                   | Starts playing ambient music           |
-| `ambientMusic.pause`           | ⏸️ Pause Music                                          | Pauses the currently playing track     |
-| `ambientMusic.resume`          | ⏯ Resume Music                                          | Resumes paused ambient music           |
-| `ambientMusic.closeTab`        | ❌ Close Music Player                                   | Closes the music player tab            |
-| `ambientMusic.resetPlaylist`   | 🔄 Reset Playlist to Default                            | Restores the default ambient playlist  |
-
-
----
-> 💡 **Tip:** You can customize keybindings for these commands or use them in your automation workflows inside VS Code.
-
----
-
-## 🔧 Configuration (Optional)
-
-These settings can be customized in your VS Code `settings.json`.
-
-
-| Setting Key                                | Type      | Default | Description                                                                                      |
-|-------------------------------------------|-----------|---------|--------------------------------------------------------------------------------------------------|
-| `ambientMusic.autoPlayOnStartup`          | `boolean` | `true` | Automatically start ambient music when VS Code launches.                                         |
-| `ambientMusic.port`                       | `number`  | `3303`  | Port for the WebSocket server. Set to `0` for dynamic port allocation.                          |
-| `ambientMusic.switchIntervalMinutes`      | `number`  | `30`    | Time interval (in minutes) to automatically switch to the next video in the playlist.           |
-| `ambientMusic.debug`                      | `boolean` | `false` | Enables verbose debug logging for easier troubleshooting.                                        |
-| `ambientMusic.playlist`                   | `array`   | `[]`    | Custom list of ambient YouTube videos with rich metadata. See example below.                    |
-
-### 🎵 Playlist Format Example
+Add a playlist to your VS Code `settings.json`. YouTube URLs must use the `youtube.com/watch?v=...` format.
 
 ```json
 {
-  "title": "Peaceful Piano",
-  "url": "https://youtu.be/abc123",
-  "tags": ["piano", "relax"],
-  "channel": {
-    "name": "Chill Music Co.",
-    "url": "https://youtube.com/@chillmusicco"
-  }
+  "ambientMusic.playlist": [
+    {
+      "title": "Lofi hip hop radio",
+      "url": "https://www.youtube.com/watch?v=jfKfPfyJRdk",
+      "tags": ["lofi", "focus"],
+      "channel": {
+        "name": "Lofi Girl",
+        "url": "https://www.youtube.com/@LofiGirl"
+      }
+    }
+  ]
 }
-
 ```
 
-> ℹ️ Use these to personalize your flow.
+## Requirements
 
----
+- VS Code 1.80 or later.
+- Google Chrome installed to open the player window.
+- An internet connection to stream YouTube videos.
 
+## Support
 
-## 📁 Installation
+Found a problem or have an idea? [Open an issue](https://github.com/taj54/ambient-music-vs-extension/issues) or visit the [GitHub repository](https://github.com/taj54/ambient-music-vs-extension).
 
-Install from [**Visual Studio Code Marketplace**](https://marketplace.visualstudio.com/items?itemName=taj154dev.ambient-music-vs-extension).
+## Credits
 
-> 💡 Want to close the music tab without shutting down the extension? Use the `Ambient Music: ❌ Close Tab` command.
+Built by [Taj](https://github.com/taj54) to make it easier to find a little focus and flow while coding. Music in the default playlist is provided by these creators:
 
----
+- [Dreamy Lofi](https://www.youtube.com/@Mellow_lofi)
+- [Chillhop Music](https://www.youtube.com/@ChillhopMusic)
+- [la vinyls](https://www.youtube.com/@lavinyls)
+- [SereneBeats](https://www.youtube.com/@SereneBeatsRelax)
+- [STEEZYASFUCK](https://www.youtube.com/@steezyasfvck)
+- [EasyLofiGrooves](https://www.youtube.com/@EasyLofiGrooves)
+- [Abao in Tokyo](https://www.youtube.com/@abaointokyo)
+- [The AMP Channel](https://www.youtube.com/@TheAMPProject)
+- [Lofi Girl](https://www.youtube.com/@LofiGirl)
+- [Chill Dev_](https://www.youtube.com/@ChillDevIO)
+- [TheSilentWatcher](https://www.youtube.com/@TheSilentWatcher)
+- [Kai's Dojo](https://www.youtube.com/@KaisDojo31)
+- [Cafe Music BGM channel](https://www.youtube.com/@cafemusicbgmchannel)
+- [Chill Music Lab](https://www.youtube.com/@MusicLabChill)
 
-## 🔗 Requirements
+If you're a credited creator and would like a change, please [open an issue](https://github.com/taj54/ambient-music-vs-extension/issues).
 
-- VS Code version 1.80+
-- Internet access for streaming
+## Contributing
 
----
+See the [Developer Guide](DEVELOPER.md) for setup, architecture, packaging, and testing instructions.
 
-## 🐛 Support
+## License
 
-Have feedback or issues?
-
-- 📂 [GitHub Repository](https://github.com/taj54/ambient-music-vs-extension)
-- 📧 Email: [tajulislamj200@gmail.com](mailto:tajulislamj200@gmail.com)
-
----
-
-## 💼 License
-
-[MIT License](LICENSE) © 2025 [Taj](https://github.com/taj54)
-
----
-
-## 💬 Credits
-
-Built with ❤️ by [Taj](https://github.com/taj54), inspired by a need for focus and flow while coding.
-
-Special thanks to these amazing YouTube creators whose music powers the ambient experience:
-
-- 🎧 [Dreamy Lofi](https://www.youtube.com/@Mellow_lofi)
-- 🎧 [Chillhop Music](https://www.youtube.com/@ChillhopMusic)
-- 🎧 [la vinyls](https://www.youtube.com/@lavinyls)
-- 🎧 [SereneBeats](https://www.youtube.com/@SereneBeatsRelax)
-- 🎧 [STEEZYASFUCK](https://www.youtube.com/@steezyasfvck)
-- 🎧 [EasyLofiGrooves](https://www.youtube.com/@EasyLofiGrooves)
-- 🎧 [Abao in Tokyo](https://www.youtube.com/@abaointokyo)
-- 🎧 [The AMP Channel](https://www.youtube.com/@TheAMPProject)
-- 🎧 [Lofi Girl](https://www.youtube.com/@LofiGirl)
-- 🎧 [Chill Dev_ | Chill Music for Work & Study](https://www.youtube.com/@ChillDevIO)
-- 🎧 [TheSilentWatcher](https://www.youtube.com/@TheSilentWatcher)
-- 🎧 [Kai's Dojo](https://www.youtube.com/@KaisDojo31)
-- 🎧 [Cafe Music BGM channel](https://www.youtube.com/@cafemusicbgmchannel)
-- 🎧 [Chill Music Lab](https://www.youtube.com/@MusicLabChill)
-
-> If you're one of these creators and would like your content removed or credited differently, please [open an issue](https://github.com/taj54/ambient-music-vs-extension/issues) or reach out.
-
-## 🧰 Developer Guide
-
-If you're interested in contributing or modifying this extension, check out the [**DEVELOPER GUIDE**](./DEVELOPER.md) for setup instructions, architecture overview, packaging guide, and testing tips.
-
----
-
-> ✨ _Focus better. Code deeper. Let your workspace sing._
+[MIT](LICENSE) © [Taj](https://github.com/taj54)
