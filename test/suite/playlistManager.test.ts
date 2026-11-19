@@ -25,4 +25,18 @@ suite('Playlist Manager Test Suite', () => {
     assert.deepStrictEqual(result, []);
     assert.ok(readMediaFileStub.calledOnceWith('playlist.json'));
   });
+
+  test('loadPlaylistWhenReady should expose a configured playlist immediately', () => {
+    const configuredPlaylist = [{
+      title: 'Configured ambient track',
+      url: 'https://www.youtube.com/watch?v=WH0lsTxcw4w',
+      tags: [],
+      channel: { name: 'Ambient Channel', url: 'https://www.youtube.com/@ambient' }
+    }];
+
+    playlistManager.loadPlaylistWhenReady(configuredPlaylist);
+
+    assert.deepStrictEqual(playlistManager.getPlaylistMetadata(), configuredPlaylist);
+    assert.deepStrictEqual(playlistManager.getCurrentTrackMetadata(), configuredPlaylist[0]);
+  });
 });

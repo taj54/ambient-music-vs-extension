@@ -43,8 +43,12 @@ class PlaylistManager {
     }
   }
 
-  public loadPlaylistWhenReady(): void {
-    const playlist = this.loadPlaylistFromFile();
+  public loadPlaylistWhenReady(configuredPlaylist: PlaylistItem[] = []): void {
+    const playlist = configuredPlaylist.length > 0
+      ? validatePlaylist(configuredPlaylist)
+      : this.loadPlaylistFromFile();
+    this.isInitialized = true;
+    this.isUserHavePlaylist = configuredPlaylist.length > 0;
     this.initializePlaylist(playlist);
   }
 

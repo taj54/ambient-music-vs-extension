@@ -6,21 +6,25 @@ import { SidebarController } from './sidebarController';
 
 let playlistLoaded = false;
 
+function initializePlaylist(context: vscode.ExtensionContext): void {
+  fileManager.initialize(context);
+  if (!playlistLoaded) {
+    playlistManager.loadPlaylistWhenReady(getExtensionConfig().playlist);
+    playlistLoaded = true;
+  }
+}
+
 /**
  * Initializes all extension services if autoPlay is enabled.
  */
 export function initializeExtension(context: vscode.ExtensionContext, openPlayer = false) {
   logger.debug('[Ambient Music] Initializing Ambient Music Extension...');
 
-  fileManager.initialize(context);
+  initializePlaylist(context);
   if (openPlayer) {
     serverManager.openPlayer(context);
   } else {
     serverManager.start(context);
-  }
-  if (!playlistLoaded) {
-    playlistManager.loadPlaylistWhenReady();
-    playlistLoaded = true;
   }
 
 }
@@ -32,6 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
   const { autoPlayOnStartup } = getExtensionConfig();
 
   tabState.initialize();
+  initializePlaylist(context);
   registerCommands(context);
 
   const sidebarController = new SidebarController(context);
