@@ -3,7 +3,7 @@
   "displayName": "Ambient Music AutoPlayer by Taj",
   "icon": "media/logo.png",
   "description": "Auto-play ambient music when a VS Code project",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "publisher": "taj154dev",
   "author": "Taj",
   "license": "MIT",
@@ -106,7 +106,7 @@
   },
   "scripts": {
     "build": "pnpm run compile && pnpm exec vsce package --no-dependencies",
-    "install:local": "pnpm run build && code --install-extension ambient-music-vs-extension-1.6.1.vsix --force",
+    "install:local": "pnpm run build && code --install-extension ambient-music-vs-extension-1.6.2.vsix --force",
     "compile": "pnpm exec tsup",
     "watch": "pnpm exec tsup --watch",
     "test": "pnpm run compile && node ./dist/test/runTest.js"
