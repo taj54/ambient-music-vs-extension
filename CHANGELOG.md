@@ -4,6 +4,25 @@ All notable changes for each version of the Ambient Music extension.
 
 ---
 
+## v2.0.0 2026-11-19
+
+### Added
+
+- add packaging and installation scripts for VSIX extension
+
+### Changed
+
+- update README.md for clarity and organization
+- update version to 1.6.3 in package.json
+- update version to 1.6.2 and adjust local installation script
+- improve server instance management and update package configuration
+- remove unnecessary git_tag option
+- change release trigger to 'created'
+- update universal-version-bump to v0.14.0
+- update version to 1.6.1
+- //github.com/taj54/ambient-music-vs-extension
+- change release trigger to published
+
 ## v1.6.0 2025-09-03
 
 ### Changed
