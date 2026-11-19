@@ -23,8 +23,8 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
 
-      - name: Package extension
-        run: pnpm run build
+      - name: Compile extension
+        run: pnpm run compile
 
       - name: Publish to VS Code Marketplace
         uses: HaaLeo/publish-vscode-extension@v2
@@ -32,3 +32,4 @@ jobs:
           pat: ${{ secrets.VSCE_PAT }}
           registryUrl: https://marketplace.visualstudio.com
           dependencies: false
+          skipDuplicate: true
