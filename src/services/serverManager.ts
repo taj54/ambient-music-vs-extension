@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import * as net from 'net';
 import * as vscode from 'vscode';
 import { logger, getExtensionConfig, tryOpenTab } from '../utils';
 import { playlistManager, webSocketManager } from '.';
@@ -22,11 +23,11 @@ export class ServerManager {
   }
 
   public start(context: vscode.ExtensionContext): void {
-    const isPrimary = !this.isAlreadyRunning();
-    if (isPrimary) {
-      this.createLockFile();
-    }
+    void this.startIfPrimary(context);
+  }
 
+  private async startIfPrimary(context: vscode.ExtensionContext): Promise<void> {
+    const isPrimary = !(await this.isAlreadyRunning());
     const config = getExtensionConfig();
 
     if (isPrimary) {
@@ -39,6 +40,7 @@ export class ServerManager {
         }
 
         const port = address.port;
+        this.createLockFile(port);
         const clientUrl = `http://localhost:${port}?port=${port}`;
         logger.debug(`[Ambient Music] Server running at ${clientUrl}`);
 
@@ -77,17 +79,55 @@ export class ServerManager {
     }
   }
 
-  private isAlreadyRunning(): boolean {
-    if (fs.existsSync(LOCK_FILE)) {
-      logger.debug('[Ambient Music] Another instance is already active.');
-      return true;
+  private async isAlreadyRunning(): Promise<boolean> {
+    if (!fs.existsSync(LOCK_FILE)) return false;
+
+    try {
+      const raw = fs.readFileSync(LOCK_FILE, 'utf8').trim();
+      let port: number | undefined;
+
+      try {
+        const lock = JSON.parse(raw) as { port?: number };
+        port = lock.port;
+      } catch {
+        port = undefined;
+      }
+
+      if (port && await this.canConnect(port)) {
+        logger.debug('[Ambient Music] Another instance is already active.');
+        return true;
+      }
+    } catch (err) {
+      logger.error('[Ambient Music] Failed to validate the instance lock:', err);
     }
+
+    this.removeLockFile();
     return false;
   }
 
-  private createLockFile(): void {
+  private canConnect(port: number): Promise<boolean> {
+    return new Promise(resolve => {
+      const socket = net.createConnection({ host: '127.0.0.1', port });
+      socket.setTimeout(500);
+      socket.once('connect', () => {
+        socket.destroy();
+        resolve(true);
+      });
+      socket.once('timeout', () => {
+        socket.destroy();
+        resolve(false);
+      });
+      socket.once('error', () => resolve(false));
+    });
+  }
+
+  private createLockFile(port: number): void {
     try {
-      fs.writeFileSync(LOCK_FILE, process.pid.toString(), { flag: 'wx' });
+      fs.writeFileSync(
+        LOCK_FILE,
+        JSON.stringify({ pid: process.pid, port }),
+        { flag: 'wx' }
+      );
       logger.debug(`Lock file created at: ${LOCK_FILE}`);
     } catch (err) {
       logger.error('[Ambient Music] Failed to create lock file:', err);

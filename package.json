@@ -105,7 +105,8 @@
     }
   },
   "scripts": {
-    "build": "pnpm run compile && pnpm exec  vsce package --no-dependencies",
+    "build": "pnpm run compile && pnpm exec vsce package --no-dependencies",
+    "install:local": "pnpm run build && code --install-extension ambient-music-vs-extension-1.6.1.vsix --force",
     "compile": "pnpm exec tsup",
     "watch": "pnpm exec tsup --watch",
     "test": "pnpm run compile && node ./dist/test/runTest.js"
