@@ -110,9 +110,9 @@ class WebSocketManager {
     const interval = setInterval(() => {
       const client = this.getClient(); 
       if (client?.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({ command: 'mute' }));
+        client.send(JSON.stringify({ command: 'unmute' }));
         client.send(JSON.stringify({ command: 'play' }));
-        logger.debug('🔁 Sent mute + play.');
+        logger.debug('🔁 Sent unmute + play.');
         clearInterval(interval);
       } else if (++attempts >= maxRetries) {
         clearInterval(interval);
