@@ -190,17 +190,17 @@ export class SidebarController implements vscode.WebviewViewProvider {
       accent-color: var(--vscode-progressBar-background);
     }
     .volume-row {
-      display: grid; grid-template-columns: 18px 1fr 36px;
+      display: grid; grid-template-columns: 28px 1fr;
       align-items: center; gap: 8px;
       margin-top: 8px;
     }
-    .volume-icon { width: 14px; opacity: .72; fill: currentColor; }
-    .icon-button {
-      height: 28px; border: 1px solid var(--vscode-button-border, transparent);
-      border-radius: 7px; background: transparent;
-      font-size: 9px; cursor: pointer; padding: 0;
+    .volume-toggle {
+      width: 28px; height: 28px; border: 0; border-radius: 7px;
+      display: grid; place-items: center;
+      background: transparent; opacity: .78; cursor: pointer;
     }
-    .icon-button:hover { background: var(--vscode-toolbar-hoverBackground); }
+    .volume-toggle:hover { background: var(--vscode-toolbar-hoverBackground); opacity: 1; }
+    .volume-toggle svg { width: 16px; height: 16px; fill: currentColor; }
     .playlist-section { margin-top: 14px; }
     .playlist-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -283,9 +283,10 @@ export class SidebarController implements vscode.WebviewViewProvider {
     </div>
 
     <div class="volume-row">
-      <svg class="volume-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3zm12.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 15.5 12zm-2.5-8v2.06a7 7 0 0 1 0 11.88V20a9 9 0 0 0 0-16z"/></svg>
+      <button class="volume-toggle" id="mute" title="Mute" aria-label="Mute" aria-pressed="false">
+        <svg id="speakerIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3zm12.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 15.5 12zm-2.5-8v2.06a9 9 0 0 1 0 14v-2.06a7 7 0 0 0 0-11.88V4z"/></svg>
+      </button>
       <input id="volume" type="range" min="0" max="100" value="100" aria-label="Volume">
-      <button class="icon-button" id="mute" title="Mute">Mute</button>
     </div>
 
   </main>
@@ -302,6 +303,7 @@ export class SidebarController implements vscode.WebviewViewProvider {
     const vscode = acquireVsCodeApi();
     const post = (command, extra = {}) => vscode.postMessage({ command, ...extra });
     let isPlaying = false;
+    let isMuted = false;
     const formatTime = value => {
       const seconds = Math.max(0, Math.floor(value || 0));
       return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
@@ -311,7 +313,8 @@ export class SidebarController implements vscode.WebviewViewProvider {
     document.getElementById('next').onclick = () => post('next');
     const playPause = document.getElementById('playPause');
     playPause.onclick = () => post(isPlaying ? 'pause' : 'play');
-    document.getElementById('mute').onclick = () => post('mute');
+    const mute = document.getElementById('mute');
+    mute.onclick = () => post(isMuted ? 'unmute' : 'mute');
     document.getElementById('volume').oninput = event => post('set_volume', { value: Number(event.target.value) });
     document.getElementById('progress').onchange = event => post('seek', { value: Number(event.target.value) });
     document.querySelectorAll('.track').forEach(button => {
@@ -335,17 +338,22 @@ export class SidebarController implements vscode.WebviewViewProvider {
         const time = document.getElementById('time');
         const elapsed = document.getElementById('elapsed');
         const volume = document.getElementById('volume');
-        const mute = document.getElementById('mute');
+        isMuted = status.muted;
+        const speakerIcon = document.getElementById('speakerIcon');
+        if (speakerIcon) {
+          speakerIcon.innerHTML = isMuted
+            ? '<path d="M3 9v6h4l5 4V5L7 9H3z"/><path d="m16 9 1.4-1.4L20 10.2l2.6-2.6L24 9l-2.6 2.6L24 14l-1.4 1.4-2.6-2.6-2.6 2.6L16 14l2.6-2.6z"/>'
+            : '<path d="M3 9v6h4l5 4V5L7 9H3zm12.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 15.5 12zm-2.5-8v2.06a9 9 0 0 1 0 14v-2.06a7 7 0 0 0 0-11.88V4z"/>';
+        }
+        mute.title = isMuted ? 'Unmute' : 'Mute';
+        mute.setAttribute('aria-label', mute.title);
+        mute.setAttribute('aria-pressed', String(isMuted));
         if (progress && status.duration > 0) {
           progress.value = String(Math.round(status.currentTime / status.duration * 100));
         }
         if (elapsed) elapsed.textContent = formatTime(status.currentTime);
         if (time) time.textContent = formatTime(status.duration);
         if (volume && !volume.matches(':active')) volume.value = String(status.volume);
-        if (mute) {
-          mute.textContent = status.muted ? 'Unmute' : 'Mute';
-          mute.onclick = () => post(status.muted ? 'unmute' : 'mute');
-        }
       }
       if (event.data.type === 'currentTrack') {
         document.getElementById('currentTitle').textContent = event.data.title;
