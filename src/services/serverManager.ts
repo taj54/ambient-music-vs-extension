@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as net from 'net';
 import * as vscode from 'vscode';
 import { logger, getExtensionConfig, openInIncognito, tryOpenTab } from '../utils';
-import { playlistManager, webSocketManager } from '.';
+import { webSocketManager } from '.';
 import { createWebServer } from '../server';
 
 const LOCK_FILE = path.join(os.tmpdir(), 'ambient-music-extension.lock');
@@ -53,20 +53,13 @@ export class ServerManager {
         wsManager.setup(this.server!, clientUrl);
         wsManager.startRotation(config.switchIntervalMinutes);
 
-        // ✅ Delay tab open slightly to allow WebSocket client to load
-        setTimeout(() => {
-          if (openPlayer) {
-            openInIncognito(clientUrl, false);
-          } else {
-            tryOpenTab(clientUrl);
-          }
-          wsManager.trySendPlay(5, 1000);
-          if (config.playlist.length > 0) {
+        if (openPlayer) {
+          openInIncognito(clientUrl, false);
+        } else {
+          tryOpenTab(clientUrl);
+        }
+        wsManager.trySendPlay(25, 200);
 
-            playlistManager.updateUserPlaylist(config.playlist);
-          }
-
-        }, 1000); // 1 second delay ensures port is open
       });
 
       context.subscriptions.push({ dispose: () => this.stop() });

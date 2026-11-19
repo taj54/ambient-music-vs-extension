@@ -107,17 +107,25 @@ class WebSocketManager {
   public trySendPlay(maxRetries = 20, delayMs = 1000) {
     let attempts = 0;
 
-    const interval = setInterval(() => {
+    const trySend = () => {
       const client = this.getClient(); 
       if (client?.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({ command: 'unmute' }));
         client.send(JSON.stringify({ command: 'play' }));
         logger.debug('🔁 Sent unmute + play.');
-        clearInterval(interval);
-      } else if (++attempts >= maxRetries) {
-        clearInterval(interval);
-        logger.debug('⚠️ Client did not reconnect in time. Aborting play command.');
+        return true;
       }
+      if (++attempts >= maxRetries) {
+        logger.debug('⚠️ Client did not reconnect in time. Aborting play command.');
+        return true;
+      }
+      return false;
+    };
+
+    if (trySend()) return;
+
+    const interval = setInterval(() => {
+      if (trySend()) clearInterval(interval);
     }, delayMs);
   }
   public send(message: any) {
