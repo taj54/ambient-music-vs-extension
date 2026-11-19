@@ -304,6 +304,22 @@ export class SidebarController implements vscode.WebviewViewProvider {
     const post = (command, extra = {}) => vscode.postMessage({ command, ...extra });
     let isPlaying = false;
     let isMuted = false;
+    let lastNonZeroVolume = 100;
+    const volume = document.getElementById('volume');
+    const updateMuteIcon = () => {
+      const speakerIcon = document.getElementById('speakerIcon');
+      const mute = document.getElementById('mute');
+      if (speakerIcon) {
+        speakerIcon.innerHTML = isMuted
+          ? '<path d="M3 9v6h4l5 4V5L7 9H3z"/><path d="m16 9 1.4-1.4L20 10.2l2.6-2.6L24 9l-2.6 2.6L24 14l-1.4 1.4-2.6-2.6-2.6 2.6L16 14l2.6-2.6z"/>'
+          : '<path d="M3 9v6h4l5 4V5L7 9H3zm12.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 15.5 12zm-2.5-8v2.06a9 9 0 0 1 0 14v-2.06a7 7 0 0 0 0-11.88V4z"/>';
+      }
+      if (mute) {
+        mute.title = isMuted ? 'Unmute' : 'Mute';
+        mute.setAttribute('aria-label', mute.title);
+        mute.setAttribute('aria-pressed', String(isMuted));
+      }
+    };
     const formatTime = value => {
       const seconds = Math.max(0, Math.floor(value || 0));
       return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
@@ -314,8 +330,31 @@ export class SidebarController implements vscode.WebviewViewProvider {
     const playPause = document.getElementById('playPause');
     playPause.onclick = () => post(isPlaying ? 'pause' : 'play');
     const mute = document.getElementById('mute');
-    mute.onclick = () => post(isMuted ? 'unmute' : 'mute');
-    document.getElementById('volume').oninput = event => post('set_volume', { value: Number(event.target.value) });
+    mute.onclick = () => {
+      if (isMuted) {
+        isMuted = false;
+        const restoredVolume = lastNonZeroVolume || 100;
+        volume.value = String(restoredVolume);
+        post('set_volume', { value: restoredVolume });
+        post('unmute');
+      } else {
+        const currentVolume = Number(volume.value);
+        if (currentVolume > 0) lastNonZeroVolume = currentVolume;
+        isMuted = true;
+        volume.value = '0';
+        post('set_volume', { value: 0 });
+        post('mute');
+      }
+      updateMuteIcon();
+    };
+    volume.oninput = event => {
+      const value = Number(event.target.value);
+      if (value > 0) lastNonZeroVolume = value;
+      isMuted = value === 0;
+      post('set_volume', { value });
+      post(isMuted ? 'mute' : 'unmute');
+      updateMuteIcon();
+    };
     document.getElementById('progress').onchange = event => post('seek', { value: Number(event.target.value) });
     document.querySelectorAll('.track').forEach(button => {
       button.onclick = () => post('select_track', { index: Number(button.dataset.index) });
@@ -337,17 +376,9 @@ export class SidebarController implements vscode.WebviewViewProvider {
         const progress = document.getElementById('progress');
         const time = document.getElementById('time');
         const elapsed = document.getElementById('elapsed');
-        const volume = document.getElementById('volume');
-        isMuted = status.muted;
-        const speakerIcon = document.getElementById('speakerIcon');
-        if (speakerIcon) {
-          speakerIcon.innerHTML = isMuted
-            ? '<path d="M3 9v6h4l5 4V5L7 9H3z"/><path d="m16 9 1.4-1.4L20 10.2l2.6-2.6L24 9l-2.6 2.6L24 14l-1.4 1.4-2.6-2.6-2.6 2.6L16 14l2.6-2.6z"/>'
-            : '<path d="M3 9v6h4l5 4V5L7 9H3zm12.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 15.5 12zm-2.5-8v2.06a9 9 0 0 1 0 14v-2.06a7 7 0 0 0 0-11.88V4z"/>';
-        }
-        mute.title = isMuted ? 'Unmute' : 'Mute';
-        mute.setAttribute('aria-label', mute.title);
-        mute.setAttribute('aria-pressed', String(isMuted));
+        if (status.volume > 0) lastNonZeroVolume = status.volume;
+        isMuted = status.muted || status.volume === 0;
+        updateMuteIcon();
         if (progress && status.duration > 0) {
           progress.value = String(Math.round(status.currentTime / status.duration * 100));
         }
