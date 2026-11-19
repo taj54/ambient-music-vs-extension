@@ -4,6 +4,28 @@ All notable changes for each version of the Ambient Music extension.
 
 ---
 
+## v2.1.0 2026-11-19
+
+### Added
+
+- enhance volume control with mute functionality and visual feedback
+- refactor WebSocketManager's trySendPlay method for improved retry logic
+- update volume control UI and functionality with mute toggle
+- add validation for video URL in extractVideoID function
+- refactor playlist initialization and enhance loadPlaylistWhenReady to accept configured playlists
+- remove open player button and related functionality from sidebar
+- improve visibility handling in sidebar to manage player status updates
+- change player to unmute by default and update related logging
+- enhance extension initialization and player handling with autoPlay option
+- update icon for Ambient Music extension to use SVG format
+- enhance player controls and UI with updated styles and functionality
+- unify play and pause buttons into a single control with dynamic state
+- implement sidebar controller and enhance player status handling
+
+### Fixed
+
+- update workflow to compile extension instead of packaging
+
 ## v2.0.0 2026-11-19
 
 ### Added
