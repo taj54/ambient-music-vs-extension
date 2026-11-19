@@ -9,6 +9,7 @@ class WebSocketManager {
   private wss: WebSocketServer | undefined;
   private connectedClient: WebSocket | undefined;
   private playerStatusListeners: Set<(status: any) => void> = new Set();
+  private browserConnectionListeners: Set<(connected: boolean) => void> = new Set();
 
   // Track all clients
   private vscodeClients: Set<WebSocket> = new Set();
@@ -42,6 +43,15 @@ class WebSocketManager {
     return new vscode.Disposable(() => this.playerStatusListeners.delete(listener));
   }
 
+  public onBrowserConnectionChange(listener: (connected: boolean) => void): vscode.Disposable {
+    this.browserConnectionListeners.add(listener);
+    return new vscode.Disposable(() => this.browserConnectionListeners.delete(listener));
+  }
+
+  private emitBrowserConnectionChange(connected: boolean): void {
+    this.browserConnectionListeners.forEach(listener => listener(connected));
+  }
+
   public emitPlayerStatus(status: any): void {
     this.playerStatusListeners.forEach(listener => listener(status));
   }
@@ -63,6 +73,7 @@ class WebSocketManager {
             if (data.client === 'browser') {
               this.browserClient = ws;
               this.resetManualCloseFlag();
+              this.emitBrowserConnectionChange(true);
               logger.debug('[WebSocket] Browser client connected.');
             } else if (data.client === 'vscode') {
               this.vscodeClients.add(ws);
@@ -77,6 +88,7 @@ class WebSocketManager {
       ws.on('close', () => {
         if (ws === this.browserClient) {
           this.browserClient = null;
+          this.emitBrowserConnectionChange(false);
           logger.debug('[WebSocket] Browser client disconnected.');
         } else {
           this.vscodeClients.delete(ws);
@@ -158,6 +170,7 @@ class WebSocketManager {
     this.wss?.close(() => logger.debug('[Ambient Music] WebSocket server closed.'));
     this.wss = undefined;
     this.browserClient = null;
+    this.emitBrowserConnectionChange(false);
     this.vscodeClients.clear();
   }
 }

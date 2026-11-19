@@ -5,6 +5,7 @@ export class SidebarController implements vscode.WebviewViewProvider {
   public static readonly viewType = 'ambientMusic.sidebar';
   private webviewView: vscode.WebviewView | undefined;
   private statusDisposable: vscode.Disposable | undefined;
+  private browserConnectionDisposable: vscode.Disposable | undefined;
 
   constructor(private readonly context: vscode.ExtensionContext) {}
 
@@ -24,9 +25,19 @@ export class SidebarController implements vscode.WebviewViewProvider {
     this.statusDisposable = webSocketManager.onPlayerStatus(status => {
       webviewView.webview.postMessage({ type: 'playerStatus', status });
     });
+    this.browserConnectionDisposable?.dispose();
+    this.browserConnectionDisposable = webSocketManager.onBrowserConnectionChange(connected => {
+      webviewView.webview.postMessage({ type: 'browserConnection', connected });
+    });
 
     webviewView.webview.onDidReceiveMessage(message => {
       switch (message.command) {
+        case 'openBrowser':
+          void vscode.commands.executeCommand('ambientMusic.openTab');
+          break;
+        case 'closeBrowser':
+          void vscode.commands.executeCommand('ambientMusic.closeTab');
+          break;
         case 'play':
         case 'pause':
         case 'unmute':
@@ -141,6 +152,16 @@ export class SidebarController implements vscode.WebviewViewProvider {
       background: var(--vscode-charts-green, #89d185);
       box-shadow: 0 0 8px var(--vscode-charts-green, #89d185);
     }
+    .header-actions { display: flex; align-items: center; gap: 7px; }
+    .browser-toggle {
+      width: 27px; height: 27px; padding: 0;
+      display: grid; place-items: center;
+      border: 1px solid color-mix(in srgb, var(--vscode-foreground) 12%, transparent);
+      border-radius: 7px; background: transparent;
+      color: var(--vscode-foreground); cursor: pointer; opacity: .8;
+    }
+    .browser-toggle:hover { background: var(--vscode-toolbar-hoverBackground); opacity: 1; }
+    .browser-toggle svg { width: 14px; height: 14px; fill: currentColor; }
     .player-card {
       border: 1px solid color-mix(in srgb, var(--vscode-foreground) 9%, transparent);
       border-radius: 14px;
@@ -257,7 +278,12 @@ export class SidebarController implements vscode.WebviewViewProvider {
       <div class="brand-mark" aria-hidden="true">♪</div>
       <span class="brand-name">Ambient Music</span>
     </div>
-    <div class="status"><span class="status-dot"></span><span id="statusText">Ready</span></div>
+    <div class="header-actions">
+      <div class="status"><span class="status-dot"></span><span id="statusText">Ready</span></div>
+      <button class="browser-toggle" id="browserToggle" title="Open player" aria-label="Open player">
+        <svg id="browserIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3z"/><path d="M19 19H5V5h6V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6h-2v6z"/></svg>
+      </button>
+    </div>
   </div>
 
   <main class="player-card">
@@ -305,7 +331,20 @@ export class SidebarController implements vscode.WebviewViewProvider {
     let isPlaying = false;
     let isMuted = false;
     let lastNonZeroVolume = 100;
+    let browserOpen = ${webSocketManager.isBrowserTabConnected()};
     const volume = document.getElementById('volume');
+    const browserToggle = document.getElementById('browserToggle');
+    const setBrowserOpen = open => {
+      browserOpen = open;
+      const browserIcon = document.getElementById('browserIcon');
+      browserToggle.title = open ? 'Close player' : 'Open player';
+      browserToggle.setAttribute('aria-label', browserToggle.title);
+      if (browserIcon) {
+        browserIcon.innerHTML = open
+          ? '<path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3z"/><path d="M19 19H5V5h6V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6h-2v6z"/>'
+          : '<path d="M21 11V5a2 2 0 0 0-2-2h-6v2h6v6h2zM3 13v6a2 2 0 0 0 2 2h6v-2H5v-6H3zm17.59-8L9 16.59 7.59 15.17 19.17 3.59 20.59 5z"/>';
+      }
+    };
     const updateMuteIcon = () => {
       const speakerIcon = document.getElementById('speakerIcon');
       const mute = document.getElementById('mute');
@@ -347,6 +386,11 @@ export class SidebarController implements vscode.WebviewViewProvider {
       }
       updateMuteIcon();
     };
+    browserToggle.onclick = () => {
+      const open = !browserOpen;
+      setBrowserOpen(open);
+      post(open ? 'openBrowser' : 'closeBrowser');
+    };
     volume.oninput = event => {
       const value = Number(event.target.value);
       if (value > 0) lastNonZeroVolume = value;
@@ -360,6 +404,9 @@ export class SidebarController implements vscode.WebviewViewProvider {
       button.onclick = () => post('select_track', { index: Number(button.dataset.index) });
     });
     window.addEventListener('message', event => {
+      if (event.data.type === 'browserConnection') {
+        setBrowserOpen(event.data.connected);
+      }
       if (event.data.type === 'playerStatus') {
         const status = event.data.status;
         isPlaying = status.state === 1;
