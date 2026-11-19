@@ -21,10 +21,23 @@ if (packageResult.status !== 0) {
 }
 
 if (process.argv[2] === 'install') {
-  const installResult = spawnSync(
-    codeCommand,
-    ['--install-extension', vsixPath, '--force'],
-    { cwd: path.join(__dirname, '..'), stdio: 'inherit' }
-  );
+  const installArgs = ['--install-extension', vsixPath, '--force'];
+  const installResult = process.platform === 'win32'
+    ? spawnSync(
+      process.env.ComSpec || 'cmd.exe',
+      ['/d', '/c', 'call', codeCommand, ...installArgs],
+      { cwd: path.join(__dirname, '..'), stdio: 'inherit' }
+    )
+    : spawnSync(
+      codeCommand,
+      installArgs,
+      { cwd: path.join(__dirname, '..'), stdio: 'inherit' }
+    );
+
+  if (installResult.error) {
+    console.error(`Failed to launch VS Code CLI: ${installResult.error.message}`);
+    process.exit(1);
+  }
+
   process.exit(installResult.status ?? 1);
 }

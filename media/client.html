@@ -59,10 +59,25 @@
           onReady: () => {
             console.log('[Client] YouTube player ready');
             flushQueuedCommands();
-          }
+          },
+          onStateChange: sendPlayerStatus,
+          onVolumeChange: sendPlayerStatus
         }
       });
+      setInterval(sendPlayerStatus, 1000);
     };
+
+    function sendPlayerStatus() {
+      if (!player?.getPlayerState) return;
+      socket.send(JSON.stringify({
+        type: 'playerStatus',
+        state: player.getPlayerState(),
+        currentTime: player.getCurrentTime?.() || 0,
+        duration: player.getDuration?.() || 0,
+        volume: player.getVolume?.() || 0,
+        muted: player.isMuted?.() || false
+      }));
+    }
 
     function flushQueuedCommands() {
       while (commandQueue.length > 0) {
@@ -82,6 +97,21 @@
           break;
         case 'unmute':
           player?.unMute();
+          break;
+        case 'mute':
+          player?.mute();
+          break;
+        case 'set_volume':
+          if (typeof url === 'number') player?.setVolume(url);
+          break;
+        case 'seek':
+          if (typeof url === 'number') {
+            const duration = player?.getDuration?.() || 0;
+            player?.seekTo(duration * url / 100, true);
+          }
+          break;
+        case 'get_status':
+          sendPlayerStatus();
           break;
         case 'switch':
           if (vid) {

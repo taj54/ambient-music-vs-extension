@@ -8,6 +8,7 @@ class WebSocketManager {
   private static instance: WebSocketManager;
   private wss: WebSocketServer | undefined;
   private connectedClient: WebSocket | undefined;
+  private playerStatusListeners: Set<(status: any) => void> = new Set();
 
   // Track all clients
   private vscodeClients: Set<WebSocket> = new Set();
@@ -34,6 +35,15 @@ class WebSocketManager {
 
   public getClient(): WebSocket | undefined {
     return this.connectedClient;
+  }
+
+  public onPlayerStatus(listener: (status: any) => void): vscode.Disposable {
+    this.playerStatusListeners.add(listener);
+    return new vscode.Disposable(() => this.playerStatusListeners.delete(listener));
+  }
+
+  public emitPlayerStatus(status: any): void {
+    this.playerStatusListeners.forEach(listener => listener(status));
   }
 
   public isBrowserTabConnected(): boolean {

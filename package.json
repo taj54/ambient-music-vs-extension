@@ -3,7 +3,7 @@
   "displayName": "Ambient Music AutoPlayer by Taj",
   "icon": "media/logo.png",
   "description": "Auto-play ambient music when a VS Code project",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "publisher": "taj154dev",
   "author": "Taj",
   "license": "MIT",
@@ -43,6 +43,24 @@
     "onStartupFinished"
   ],
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ambientMusic",
+          "title": "Ambient Music",
+          "icon": "media/logo.png"
+        }
+      ]
+    },
+    "views": {
+      "ambientMusic": [
+        {
+          "type": "webview",
+          "id": "ambientMusic.sidebar",
+          "name": "Player Controller"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "ambientMusic.setPlaylist",

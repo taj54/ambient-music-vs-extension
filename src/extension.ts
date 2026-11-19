@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { fileManager, playlistManager, serverManager, webSocketManager } from './services';
 import { registerCommands } from './commands';
 import { logger, getExtensionConfig, tabState } from './utils';
+import { SidebarController } from './sidebarController';
 
 /**
  * Initializes all extension services if autoPlay is enabled.
@@ -22,9 +23,15 @@ export function activate(context: vscode.ExtensionContext) {
   const { autoPlayOnStartup } = getExtensionConfig();
 
   tabState.initialize();
-
-
   registerCommands(context);
+
+  const sidebarController = new SidebarController(context);
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      SidebarController.viewType,
+      sidebarController
+    )
+  );
 
 
   if (autoPlayOnStartup) {

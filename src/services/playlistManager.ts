@@ -84,6 +84,23 @@ class PlaylistManager {
     return this.getCurrentTrack();
   }
 
+  public getPreviousTrack(): string {
+    if (this.embedUrls.length === 0) return "";
+    this.currentTrackIndex =
+      (this.currentTrackIndex - 1 + this.embedUrls.length) % this.embedUrls.length;
+    return this.getCurrentTrack();
+  }
+
+  public selectTrack(index: number): string {
+    if (this.embedUrls.length === 0) return "";
+    this.currentTrackIndex = Math.max(0, Math.min(index, this.embedUrls.length - 1));
+    return this.getCurrentTrack();
+  }
+
+  public getPlaylistMetadata(): PlaylistItem[] {
+    return this.richUserPlaylist;
+  }
+
   public getCurrentTrackMetadata(): PlaylistItem | null {
     return this.richUserPlaylist.length > 0
       ? this.richUserPlaylist[this.currentTrackIndex % this.richUserPlaylist.length]

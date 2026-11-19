@@ -22,6 +22,11 @@ export function handleWebSocketConnection(ws: WebSocket, clientUrl: string): voi
         return;
       }
 
+      if (data.type === 'playerStatus') {
+        webSocketManager.emitPlayerStatus(data);
+        return;
+      }
+
       // ✅ Handle normal command
       if (data.command === 'clientClosed') {
         logger.debug('Client sent "clientClosed" command.');
