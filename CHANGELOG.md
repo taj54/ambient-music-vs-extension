@@ -4,6 +4,23 @@ All notable changes for each version of the Ambient Music extension.
 
 ---
 
+## v2.2.0 2026-11-20
+
+### Added
+
+- implement player synchronization and improve WebSocket handling for browser clients
+- implement track management and improve WebSocket handling for better client communication
+- update music SVG to enhance visual representation and add legacy support
+
+### Changed
+
+- bump version to 2.1.1
+
+### Fixed
+
+- update SVG dimensions for music icon and bump version to 2.1.2
+- adjust SVG dimensions and viewBox for improved rendering of music icon
+
 ## v2.1.0 2026-11-19
 
 ### Added
