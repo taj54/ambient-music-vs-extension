@@ -19,7 +19,8 @@ cd ambient-music-vs-extension
 ### 2. Install Dependencies
 
 ```bash
-npm install
+corepack enable
+corepack pnpm install
 ```
 
 ### 3. Open in VS Code
@@ -30,22 +31,25 @@ Launch the project in VS Code and press `F5` to start the **Extension Developmen
 
 ## 🛠️ Development Tips
 
-- **Main Entry**: `src/extension.ts`
-- **Web UI**: `media/client.html` (YouTube player)
-- **WebSocket Logic**: `src/webSocketManager.ts`
-- **Server Logic**: `src/serverManager.ts`
-- **Playlist Logic**: `src/playlist.ts`
+- **Main entry**: `src/extension.ts`
+- **Web UI**: `media/client.html`
+- **Sidebar**: `src/sidebarController.ts`
+- **WebSocket logic**: `src/services/webSocketManager.ts`
+- **Server logic**: `src/services/serverManager.ts`
+- **Playlist logic**: `src/services/playlistManager.ts`
+- **Build config**: `tsup.config.ts`
 
-Use `npm run compile` or enable TypeScript auto-compilation in VS Code.
+Use `pnpm run compile` before packaging or testing.
 
 ---
 
 ## ✅ Before You Submit a PR
 
-- Format your code with Prettier (if configured)
+- Follow the existing TypeScript style and keep changes focused
 - Ensure existing functionality works
 - Write or update relevant test cases
-- Run `npm run compile` and check for build errors
+- Run `pnpm run compile` and check for build errors
+- Run `pnpm test`
 - Describe your changes clearly in the PR message
 
 ---
@@ -63,9 +67,9 @@ Check out the [Issues Tab](https://github.com/taj54/ambient-music-vs-extension/i
 
 - Test your changes via Extension Development Host (`F5`)
 - Watch logs in VS Code terminal for output
-- To run tests:  
+- To run tests:
   ```bash
-  npm test
+  pnpm test
   ```
 
 ---

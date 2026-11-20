@@ -16,6 +16,8 @@ Bring a little calm to your coding sessions. Ambient Music AutoPlayer plays a cu
 
 Automatic playback is enabled by default. Chrome must be installed for the player window to open. You can turn off automatic startup with the `ambientMusic.autoPlayOnStartup` setting.
 
+The extension uses one shared local server for all VS Code windows. Additional windows connect to that server instead of starting duplicate player instances.
+
 ## Features
 
 - Start ambient music when VS Code launches.
