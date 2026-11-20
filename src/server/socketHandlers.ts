@@ -1,13 +1,9 @@
 import { WebSocket } from 'ws';
 import { logger,tabState } from '../utils';
-import { webSocketManager } from '../services';
+import { playlistManager, webSocketManager } from '../services';
 
 export function handleWebSocketConnection(ws: WebSocket, clientUrl: string): void {
   logger.debug(`Client connected via WebSocket: ${clientUrl}`);
-
-  webSocketManager.setClient(ws);
-  tabState.markOpen(); 
-  webSocketManager.resetManualCloseFlag();
 
   ws.on('message', msg => {
     logger.debug(`Received WebSocket message: ${msg}`);
@@ -17,13 +13,28 @@ export function handleWebSocketConnection(ws: WebSocket, clientUrl: string): voi
       // ✅ Handle client registration
       if (data.type === 'register' && data.client === 'browser') {
         logger.debug('✅ Browser tab registered via WebSocket.');
-        webSocketManager.setClient(ws);
-        tabState.markOpen(); 
         return;
       }
 
       if (data.type === 'playerStatus') {
         webSocketManager.emitPlayerStatus(data);
+        return;
+      }
+
+      if (data.command === 'open_player') {
+        webSocketManager.openBrowserTab();
+        return;
+      }
+
+      if (data.command && data.command !== 'clientClosed') {
+        if (data.command === 'switch' && typeof data.url === 'string') {
+          playlistManager.setCurrentTrack(data.url);
+          const track = playlistManager.getCurrentTrackMetadata();
+          if (track) {
+            webSocketManager.emitCurrentTrack({ title: track.title, url: data.url });
+          }
+        }
+        webSocketManager.send(data);
         return;
       }
 
@@ -41,8 +52,10 @@ export function handleWebSocketConnection(ws: WebSocket, clientUrl: string): voi
 
   ws.on('close', () => {
     logger.debug('WebSocket client disconnected.');
-    webSocketManager.setClient(undefined);
-    tabState.markClosed(); 
+    webSocketManager.unregisterBrowserClient(ws);
+    if (!webSocketManager.isBrowserTabConnected()) {
+      tabState.markClosed();
+    }
 
     if (!webSocketManager.wasManuallyClosed()) {
       logger.debug('Tab was not manually closed — attempting to reopen.');

@@ -6,9 +6,8 @@ import { initializeExtension } from './extension';
 export function registerCommands(context: vscode.ExtensionContext) {
 
   const sendCommand = (command: string, label: string) => {
-    const client = webSocketManager.getClient();
-    if (client && client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({ command }));
+    if (webSocketManager.isRemoteClient() || webSocketManager.isBrowserTabConnected()) {
+      webSocketManager.send({ command });
       logger.debug(`${label} command sent.`)
       vscode.window.showInformationMessage(`${label} command sent.`);
     } else {
@@ -51,9 +50,10 @@ export function registerCommands(context: vscode.ExtensionContext) {
 
   const closeTabCommand = vscode.commands.registerCommand('ambientMusic.closeTab', () => {
     sendCommand('close_tab', '❌ Close Tab');
-    serverManager.stop();
-    webSocketManager.shutdown();
-
+    if (!webSocketManager.isRemoteClient()) {
+      serverManager.stop();
+      webSocketManager.shutdown();
+    }
 
   });
   const resetCommand = vscode.commands.registerCommand('ambientMusic.resetPlaylist', () => {

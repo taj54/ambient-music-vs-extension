@@ -5,6 +5,7 @@ export class SidebarController implements vscode.WebviewViewProvider {
   public static readonly viewType = 'ambientMusic.sidebar';
   private webviewView: vscode.WebviewView | undefined;
   private statusDisposable: vscode.Disposable | undefined;
+  private currentTrackDisposable: vscode.Disposable | undefined;
   private browserConnectionDisposable: vscode.Disposable | undefined;
 
   constructor(private readonly context: vscode.ExtensionContext) {}
@@ -24,6 +25,10 @@ export class SidebarController implements vscode.WebviewViewProvider {
     this.statusDisposable?.dispose();
     this.statusDisposable = webSocketManager.onPlayerStatus(status => {
       webviewView.webview.postMessage({ type: 'playerStatus', status });
+    });
+    this.currentTrackDisposable?.dispose();
+    this.currentTrackDisposable = webSocketManager.onCurrentTrack(track => {
+      webviewView.webview.postMessage({ type: 'currentTrack', title: track.title });
     });
     this.browserConnectionDisposable?.dispose();
     this.browserConnectionDisposable = webSocketManager.onBrowserConnectionChange(connected => {
@@ -86,10 +91,7 @@ export class SidebarController implements vscode.WebviewViewProvider {
       webSocketManager.send({ command: 'switch', url });
       const metadata = playlistManager.getCurrentTrackMetadata();
       if (metadata) {
-        this.webviewView?.webview.postMessage({
-          type: 'currentTrack',
-          title: metadata.title
-        });
+        webSocketManager.emitCurrentTrack({ title: metadata.title, url });
       }
     }
   }

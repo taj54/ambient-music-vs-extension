@@ -101,6 +101,13 @@ class PlaylistManager {
     return this.getCurrentTrack();
   }
 
+  public setCurrentTrack(url: string): void {
+    const index = this.embedUrls.indexOf(url);
+    if (index >= 0) {
+      this.currentTrackIndex = index;
+    }
+  }
+
   public getPlaylistMetadata(): PlaylistItem[] {
     return this.richUserPlaylist;
   }

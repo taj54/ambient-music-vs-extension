@@ -39,4 +39,26 @@ suite('Playlist Manager Test Suite', () => {
     assert.deepStrictEqual(playlistManager.getPlaylistMetadata(), configuredPlaylist);
     assert.deepStrictEqual(playlistManager.getCurrentTrackMetadata(), configuredPlaylist[0]);
   });
+
+  test('setCurrentTrack should sync the playlist index from an embed URL', () => {
+    const playlist = [
+      {
+        title: 'First track',
+        url: 'https://www.youtube.com/watch?v=WH0lsTxcw4w',
+        tags: [],
+        channel: { name: 'Channel', url: 'https://www.youtube.com/@channel' }
+      },
+      {
+        title: 'Second track',
+        url: 'https://www.youtube.com/watch?v=OkjC4z5dFrg',
+        tags: [],
+        channel: { name: 'Channel', url: 'https://www.youtube.com/@channel' }
+      }
+    ];
+    playlistManager.loadPlaylistWhenReady(playlist);
+
+    playlistManager.setCurrentTrack('https://www.youtube.com/embed/OkjC4z5dFrg?enablejsapi=1');
+
+    assert.strictEqual(playlistManager.getCurrentTrackMetadata()?.title, 'Second track');
+  });
 });

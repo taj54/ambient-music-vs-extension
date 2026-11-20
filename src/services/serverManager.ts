@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as net from 'net';
 import * as vscode from 'vscode';
-import { logger, getExtensionConfig, openInIncognito, tryOpenTab } from '../utils';
+import { logger, getExtensionConfig } from '../utils';
 import { webSocketManager } from '.';
 import { createWebServer } from '../server';
 
@@ -12,6 +12,8 @@ const LOCK_FILE = path.join(os.tmpdir(), 'ambient-music-extension.lock');
 export class ServerManager {
   private static instance: ServerManager;
   private server: ReturnType<typeof createWebServer> | undefined;
+  private startupPromise: Promise<void> | undefined;
+  private ownsLock = false;
 
   private constructor() { }
 
@@ -23,29 +25,67 @@ export class ServerManager {
   }
 
   public start(context: vscode.ExtensionContext): void {
-    void this.startIfPrimary(context, false);
+    this.ensureStarted(context, false);
   }
 
   public openPlayer(context: vscode.ExtensionContext): void {
-    void this.startIfPrimary(context, true);
+    this.ensureStarted(context, true);
+  }
+
+  private ensureStarted(context: vscode.ExtensionContext, openPlayer: boolean): void {
+    if (this.server) {
+      if (openPlayer) webSocketManager.openBrowserTab();
+      return;
+    }
+
+    if (this.startupPromise) {
+      void this.startupPromise.then(() => {
+        if (openPlayer) {
+          if (this.server) webSocketManager.openBrowserTab();
+          else webSocketManager.send({ command: 'open_player' });
+        }
+      });
+      return;
+    }
+
+    this.startupPromise = this.startIfPrimary(context, openPlayer).finally(() => {
+      this.startupPromise = undefined;
+    });
   }
 
   private async startIfPrimary(context: vscode.ExtensionContext, openPlayer: boolean): Promise<void> {
-    const runningPort = await this.getRunningPort();
-    const isPrimary = runningPort === undefined;
+    let runningPort = await this.getRunningPort();
     const config = getExtensionConfig();
 
-    if (isPrimary) {
+    if (runningPort === undefined && !this.claimLock()) {
+      for (let attempt = 0; attempt < 50 && runningPort === undefined; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+        runningPort = await this.getRunningPort();
+      }
+
+      if (runningPort === undefined) {
+        logger.error('[Ambient Music] Another instance is starting, but its server did not become available.');
+        return;
+      }
+    }
+
+    if (this.ownsLock) {
       this.server = createWebServer(context.extensionPath);
+      this.server.once('error', err => {
+        logger.error('[Ambient Music] Failed to start the local server:', err);
+        this.server = undefined;
+        this.removeLockFile();
+      });
       this.server.listen(config.preferredPort, () => {
         const address = this.server?.address();
         if (typeof address !== 'object' || !address?.port) {
           logger.error('[Ambient Music] Failed to resolve valid port. Aborting launch.');
+          this.stop();
           return;
         }
 
         const port = address.port;
-        this.createLockFile(port);
+        this.updateLockFile(port);
         const clientUrl = `http://localhost:${port}?port=${port}`;
         logger.debug(`[Ambient Music] Server running at ${clientUrl}`);
 
@@ -53,11 +93,7 @@ export class ServerManager {
         wsManager.setup(this.server!, clientUrl);
         wsManager.startRotation(config.switchIntervalMinutes);
 
-        if (openPlayer) {
-          openInIncognito(clientUrl, false);
-        } else {
-          tryOpenTab(clientUrl);
-        }
+        wsManager.openBrowserTab();
         wsManager.trySendPlay(25, 200);
 
       });
@@ -65,8 +101,9 @@ export class ServerManager {
       context.subscriptions.push({ dispose: () => this.stop() });
     } else {
       logger.debug('[Ambient Music] Secondary window detected — not starting server.');
+      webSocketManager.connectToServer(runningPort);
       if (openPlayer && runningPort) {
-        openInIncognito(`http://localhost:${runningPort}?port=${runningPort}`, false);
+        webSocketManager.send({ command: 'open_player' });
       }
     }
 
@@ -89,18 +126,78 @@ export class ServerManager {
 
     try {
       const raw = fs.readFileSync(LOCK_FILE, 'utf8').trim();
-      const lock = JSON.parse(raw) as { port?: number };
+      const lock = JSON.parse(raw) as { pid?: number; port?: number };
       const port = lock.port;
-      if (typeof port === 'number' && await this.canConnect(port)) {
+      if (typeof port === 'number' && port > 0 && await this.canConnect(port)) {
         logger.debug('[Ambient Music] Another instance is already active.');
         return port;
       }
+
+      if (typeof lock.pid === 'number' && this.isProcessRunning(lock.pid)) {
+        return undefined;
+      }
+
+      this.removeStaleLockFile(raw);
     } catch (err) {
       logger.error('[Ambient Music] Failed to validate the instance lock:', err);
+      try {
+        if (Date.now() - fs.statSync(LOCK_FILE).mtimeMs > 5000) {
+          this.removeStaleLockFile();
+        }
+      } catch (statError) {
+        logger.error('[Ambient Music] Failed to inspect the instance lock:', statError);
+      }
     }
 
-    this.removeLockFile();
     return undefined;
+  }
+
+  private claimLock(): boolean {
+    let fd: number | undefined;
+    try {
+      fd = fs.openSync(LOCK_FILE, 'wx');
+      fs.writeSync(fd, JSON.stringify({ pid: process.pid, port: 0 }));
+      this.ownsLock = true;
+      logger.debug('[Ambient Music] Primary instance lock acquired.');
+      return true;
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== 'EEXIST') {
+        logger.error('[Ambient Music] Failed to acquire the instance lock:', err);
+      }
+      return false;
+    } finally {
+      if (fd !== undefined) fs.closeSync(fd);
+    }
+  }
+
+  private updateLockFile(port: number): void {
+    try {
+      fs.writeFileSync(LOCK_FILE, JSON.stringify({ pid: process.pid, port }));
+      logger.debug('[Ambient Music] Instance lock updated with server port.');
+    } catch (err) {
+      logger.error('[Ambient Music] Failed to update the instance lock:', err);
+      this.stop();
+    }
+  }
+
+  private isProcessRunning(pid: number): boolean {
+    try {
+      process.kill(pid, 0);
+      return true;
+    } catch (err) {
+      return (err as NodeJS.ErrnoException).code === 'EPERM';
+    }
+  }
+
+  private removeStaleLockFile(expectedContent?: string): void {
+    try {
+      if (!fs.existsSync(LOCK_FILE)) return;
+      if (expectedContent !== undefined && fs.readFileSync(LOCK_FILE, 'utf8').trim() !== expectedContent) return;
+      fs.unlinkSync(LOCK_FILE);
+      logger.debug('[Ambient Music] Stale instance lock removed.');
+    } catch (err) {
+      logger.error('[Ambient Music] Failed to remove stale instance lock:', err);
+    }
   }
 
   private canConnect(port: number): Promise<boolean> {
@@ -119,28 +216,20 @@ export class ServerManager {
     });
   }
 
-  private createLockFile(port: number): void {
-    try {
-      fs.writeFileSync(
-        LOCK_FILE,
-        JSON.stringify({ pid: process.pid, port }),
-        { flag: 'wx' }
-      );
-      logger.debug(`Lock file created at: ${LOCK_FILE}`);
-    } catch (err) {
-      logger.error('[Ambient Music] Failed to create lock file:', err);
-    }
-  }
-
   private removeLockFile(): void {
-    if (fs.existsSync(LOCK_FILE)) {
-      try {
-        fs.unlinkSync(LOCK_FILE);
-        logger.debug('[Ambient Music] Lock file removed.');
-      } catch (err) {
-        logger.error('[Ambient Music] Failed to remove lock file:', err);
+    if (!this.ownsLock) return;
+    try {
+      if (fs.existsSync(LOCK_FILE)) {
+        const lock = JSON.parse(fs.readFileSync(LOCK_FILE, 'utf8')) as { pid?: number };
+        if (lock.pid === process.pid) {
+          fs.unlinkSync(LOCK_FILE);
+          logger.debug('[Ambient Music] Instance lock removed.');
+        }
       }
+    } catch (err) {
+      logger.error('[Ambient Music] Failed to remove instance lock:', err);
     }
+    this.ownsLock = false;
   }
 }
 

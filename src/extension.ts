@@ -64,6 +64,7 @@ export function activate(context: vscode.ExtensionContext) {
  * Graceful cleanup of servers and WebSockets.
  */
 export function deactivate() {
+  const closeBrowser = !webSocketManager.isRemoteClient() && !webSocketManager.hasOtherVSCodeClients();
+  webSocketManager.shutdown(closeBrowser);
   serverManager.stop();
-  webSocketManager.shutdown();
 }
