@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { WebSocketServer, WebSocket } from 'ws';
 import { playlistManager } from './playlistManager';
-import { logger, openInIncognito, sendTrackCommand } from '../utils';
+import { logger, minimizeBrowserWindow, openInIncognito, sendTrackCommand } from '../utils';
 import { handleWebSocketConnection } from '../server';
 
 interface PlayerStatus {
@@ -131,6 +131,7 @@ class WebSocketManager {
     if (ws !== this.connectedClient) return;
 
     this.currentPlayerStatus = status;
+    if (status.state === 1) minimizeBrowserWindow();
     this.emitPlayerStatus(status);
     const payload = JSON.stringify({ command: 'syncStatus', url: status });
     this.browserClients.forEach(client => {
