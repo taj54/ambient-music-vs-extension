@@ -4,6 +4,16 @@ import { playlistManager } from './playlistManager';
 import { logger, openInIncognito, sendTrackCommand } from '../utils';
 import { handleWebSocketConnection } from '../server';
 
+interface PlayerStatus {
+  state: number;
+  videoId?: string;
+  currentTime: number;
+  duration: number;
+  volume: number;
+  muted: boolean;
+  timestamp: number;
+}
+
 class WebSocketManager {
   private static instance: WebSocketManager;
   private wss: WebSocketServer | undefined;
@@ -15,6 +25,7 @@ class WebSocketManager {
   // Track all clients
   private vscodeClients: Set<WebSocket> = new Set();
   private browserClients: Set<WebSocket> = new Set();
+  private currentPlayerStatus: PlayerStatus | undefined;
   private remoteServerClient: WebSocket | undefined;
   private remoteReconnectTimer: NodeJS.Timeout | undefined;
   private remoteServerPort: number | undefined;
@@ -98,12 +109,35 @@ class WebSocketManager {
   }
 
   public registerBrowserClient(ws: WebSocket): void {
+    const previousClient = this.connectedClient;
     this.browserClients.add(ws);
-    this.connectedClient = ws;
+    if (!previousClient || previousClient.readyState !== WebSocket.OPEN) {
+      this.connectedClient = ws;
+    }
     this.browserOpenPending = false;
     clearTimeout(this.browserOpenTimeout);
     this.resetManualCloseFlag();
     this.emitBrowserConnectionChange(true);
+
+    if (this.currentPlayerStatus) {
+      ws.send(JSON.stringify({
+        command: 'syncStatus',
+        url: this.currentPlayerStatus
+      }));
+    }
+  }
+
+  public handleBrowserPlayerStatus(ws: WebSocket, status: PlayerStatus): void {
+    if (ws !== this.connectedClient) return;
+
+    this.currentPlayerStatus = status;
+    this.emitPlayerStatus(status);
+    const payload = JSON.stringify({ command: 'syncStatus', url: status });
+    this.browserClients.forEach(client => {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(payload);
+      }
+    });
   }
 
   public unregisterBrowserClient(ws: WebSocket): void {
@@ -305,6 +339,7 @@ class WebSocketManager {
     this.wss = undefined;
     this.browserClients.clear();
     this.connectedClient = undefined;
+    this.currentPlayerStatus = undefined;
     this.remoteServerPort = undefined;
     this.playerUrl = undefined;
     this.remotePendingMessages = [];

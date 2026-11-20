@@ -17,7 +17,7 @@ export function handleWebSocketConnection(ws: WebSocket, clientUrl: string): voi
       }
 
       if (data.type === 'playerStatus') {
-        webSocketManager.emitPlayerStatus(data);
+        webSocketManager.handleBrowserPlayerStatus(ws, data);
         return;
       }
 

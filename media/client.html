@@ -18,6 +18,7 @@
 
     let player;
     let commandQueue = [];
+    let requestedSyncVideoId;
 
     // ✅ Register as browser tab
     socket.addEventListener('open', () => {
@@ -59,12 +60,13 @@
           onReady: () => {
             console.log('[Client] YouTube player ready');
             flushQueuedCommands();
+            sendPlayerStatus();
           },
           onStateChange: sendPlayerStatus,
           onVolumeChange: sendPlayerStatus
         }
       });
-      setInterval(sendPlayerStatus, 1000);
+      setInterval(sendPlayerStatus, 250);
     };
 
     function sendPlayerStatus() {
@@ -72,10 +74,12 @@
       socket.send(JSON.stringify({
         type: 'playerStatus',
         state: player.getPlayerState(),
+        videoId: player.getVideoData?.().video_id,
         currentTime: player.getCurrentTime?.() || 0,
         duration: player.getDuration?.() || 0,
         volume: player.getVolume?.() || 0,
-        muted: player.isMuted?.() || false
+        muted: player.isMuted?.() || false,
+        timestamp: Date.now()
       }));
     }
 
@@ -86,6 +90,11 @@
     }
 
     function handleCommand({ command, url }) {
+      if (command === 'syncStatus') {
+        syncPlayerStatus(url);
+        return;
+      }
+
       const vid = extractVideoID(url);
       switch (command) {
         case 'play':
@@ -123,6 +132,47 @@
           socket.send(JSON.stringify({ command: 'clientClosed' }));
           window.close();
           break;
+      }
+    }
+
+    function syncPlayerStatus(status) {
+      if (!status?.videoId) return;
+
+      const elapsed = typeof status.timestamp === 'number'
+        ? Math.max(0, Date.now() - status.timestamp) / 1000
+        : 0;
+      const expectedTime = status.currentTime + (status.state === 1 ? elapsed : 0);
+      const currentVideoId = player.getVideoData?.()?.video_id;
+
+      if (currentVideoId !== status.videoId) {
+        if (requestedSyncVideoId !== status.videoId) {
+          if (status.state === 1) {
+            player.loadVideoById(status.videoId, expectedTime);
+          } else {
+            player.cueVideoById(status.videoId, expectedTime);
+          }
+          requestedSyncVideoId = status.videoId;
+        }
+      } else {
+        requestedSyncVideoId = undefined;
+        const currentTime = player.getCurrentTime?.() || 0;
+        if (Math.abs(currentTime - expectedTime) > 0.75) {
+          player.seekTo(expectedTime, true);
+        }
+        if (status.state === 1 && player.getPlayerState() !== 1) {
+          player.playVideo();
+        } else if (status.state !== 1 && player.getPlayerState() === 1) {
+          player.pauseVideo();
+        }
+      }
+
+      if (typeof status.volume === 'number' && player.getVolume() !== status.volume) {
+        player.setVolume(status.volume);
+      }
+      if (status.muted && !player.isMuted()) {
+        player.mute();
+      } else if (!status.muted && player.isMuted()) {
+        player.unMute();
       }
     }
 
