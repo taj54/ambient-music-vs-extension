@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import { exec } from 'child_process';
+import * as os from 'os';
+import * as path from 'path';
 import { logger } from './logger';
 import { tabState } from './TabState';
 
@@ -10,7 +12,12 @@ const chromePaths: Record<'win32' | 'darwin' | 'linux', string> = {
 };
 
 function buildLaunchCommand(url: string, chrome: string, platform: string, minimized: boolean): string {
-  const baseFlags = ['--incognito'];
+  const baseFlags = [
+    '--incognito',
+    '--no-first-run',
+    '--autoplay-policy=no-user-gesture-required',
+    `--user-data-dir="${path.join(os.tmpdir(), `ambient-music-chrome-${process.pid}`)}"`
+  ];
   if (platform === 'win32') {
     const flags = [...baseFlags, '--new-window', `--app=${url}`];
     if (minimized) flags.push('--start-minimized');

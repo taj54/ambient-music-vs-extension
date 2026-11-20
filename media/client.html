@@ -19,6 +19,7 @@
     let player;
     let commandQueue = [];
     let requestedSyncVideoId;
+    let unmuteWhenPlaying = false;
 
     // ✅ Register as browser tab
     socket.addEventListener('open', () => {
@@ -55,19 +56,41 @@
         height: '315',
         width: '560',
         videoId: initialVideoId,
-        playerVars: { autoplay: 1, mute: 0 },
+        playerVars: { autoplay: 0, playsinline: 1 },
         events: {
           onReady: () => {
             console.log('[Client] YouTube player ready');
+            player.mute();
+            unmuteWhenPlaying = true;
+            player.playVideo();
             flushQueuedCommands();
             sendPlayerStatus();
           },
-          onStateChange: sendPlayerStatus,
+          onStateChange: handlePlayerStateChange,
+          onAutoplayBlocked: () => {
+            console.warn('[Client] YouTube blocked autoplay.');
+          },
           onVolumeChange: sendPlayerStatus
         }
       });
       setInterval(sendPlayerStatus, 250);
     };
+
+    function handlePlayerStateChange(event) {
+      if (event.data === YT.PlayerState.PLAYING && unmuteWhenPlaying) {
+        unmuteWhenPlaying = false;
+        player.unMute();
+      }
+      sendPlayerStatus();
+    }
+
+    function requestUnmute() {
+      unmuteWhenPlaying = true;
+      if (player?.getPlayerState?.() === YT.PlayerState.PLAYING) {
+        unmuteWhenPlaying = false;
+        player.unMute();
+      }
+    }
 
     function sendPlayerStatus() {
       if (!player?.getPlayerState) return;
@@ -105,9 +128,10 @@
           player?.pauseVideo();
           break;
         case 'unmute':
-          player?.unMute();
+          requestUnmute();
           break;
         case 'mute':
+          unmuteWhenPlaying = false;
           player?.mute();
           break;
         case 'set_volume':
@@ -170,9 +194,10 @@
         player.setVolume(status.volume);
       }
       if (status.muted && !player.isMuted()) {
+        unmuteWhenPlaying = false;
         player.mute();
       } else if (!status.muted && player.isMuted()) {
-        player.unMute();
+        requestUnmute();
       }
     }
 
