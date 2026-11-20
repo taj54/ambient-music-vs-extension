@@ -1,3 +1,42 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-  <path fill="#424242" d="M20 3v12.2a3.8 3.8 0 1 1-2-3.35V7.45l-8 1.6v8.15a3.8 3.8 0 1 1-2-3.35V6.4L20 4z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Negative-space mask creating the exact gap around the musical note -->
+    <mask id="note-cutout">
+      <rect width="512" height="512" fill="white" />
+      <!-- Clearance around the note head -->
+      <ellipse cx="303" cy="197" rx="34" ry="29.5" transform="rotate(-18 303 197)" fill="black" />
+      <!-- Clearance around the vertical stem -->
+      <rect x="303" y="92" width="36" height="108" rx="10" fill="black" />
+      <!-- Clearance around the flag -->
+      <path d="M 320 96 C 356 108, 378 130, 378 156 C 378 174, 369 189, 355 198 L 339 182 C 347 175, 352 166, 352 154 C 352 137, 336 124, 320 118 Z" fill="black" />
+    </mask>
+  </defs>
+
+  <g fill="#3A4754">
+    <!-- Masked Screen Frame and Code Symbols -->
+    <g mask="url(#note-cutout)">
+      <!-- Laptop Screen Frame: Rounded outer top corners (r=16), rounded inner screen corners (r=4) -->
+      <path d="M 152 135 H 356 A 16 16 0 0 1 372 151 V 298 H 136 V 151 A 16 16 0 0 1 152 135 Z M 153 149 A 4 4 0 0 0 149 153 V 277 A 4 4 0 0 0 153 281 H 355 A 4 4 0 0 0 359 277 V 153 A 4 4 0 0 0 355 149 Z" fill-rule="evenodd" />
+
+      <!-- Left Curly Brace { -->
+      <path d="M 225 178 H 221 C 211 178, 206 183, 206 193 V 205 C 206 211, 202 215, 196 217 C 202 219, 206 223, 206 229 V 241 C 206 251, 211 256, 221 256 H 225 V 245 H 221 C 218 245, 217 243, 217 240 V 229 C 217 223, 214 220, 210 217 C 214 214, 217 211, 217 205 V 194 C 217 191, 218 189, 221 189 H 225 Z" />
+
+      <!-- Forward Slash / -->
+      <path d="M 259 178 H 269 L 245 256 H 235 Z" />
+
+      <!-- Right Curly Brace } (lower segment remains clean under note clearance) -->
+      <path d="M 277 178 H 281 C 291 178, 296 183, 296 193 V 205 C 296 211, 300 215, 306 217 C 300 219, 296 223, 296 229 V 241 C 296 251, 291 256, 281 256 H 277 V 245 H 281 C 284 245, 285 243, 285 240 V 229 C 285 223, 288 220, 292 217 C 288 214, 285 211, 285 205 V 194 C 285 191, 284 189, 281 189 H 277 Z" />
+    </g>
+
+    <!-- Laptop Base with Centered Notch -->
+    <path d="M 114 298 H 394 A 3 3 0 0 1 397 301 V 304 A 21 21 0 0 1 376 325 H 132 A 21 21 0 0 1 111 304 V 301 A 3 3 0 0 1 114 298 Z M 224 303 A 5 5 0 0 0 229 308 H 279 A 5 5 0 0 0 284 303 Z" fill-rule="evenodd" />
+
+    <!-- Musical Eighth Note -->
+    <g>
+      <!-- Note Head -->
+      <ellipse cx="303" cy="197" rx="23.5" ry="19.5" transform="rotate(-18 303 197)" />
+      <!-- Note Stem & Flag -->
+      <path d="M 316 108 C 316 104, 320 102, 324 104 C 350 115, 366 131, 366 153 C 366 168, 359 179, 349 185 C 346 187, 343 185, 344 181 C 349 173, 351 165, 351 156 C 351 141, 340 132, 327 126 V 197 H 316 Z" />
+    </g>
+  </g>
 </svg>
