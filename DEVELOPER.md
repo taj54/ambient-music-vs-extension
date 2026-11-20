@@ -1,194 +1,159 @@
+# Developer Guide
 
-# 🛠️ Developer Guide – Ambient Music VS Code Extension
+This guide covers setup, architecture, testing, packaging, and contribution conventions for Ambient Music AutoPlayer.
 
-> **Inspiration**  
-> One day, I realized I had been feeling unproductive for several days. After a quick self-reflection, I discovered that watching TV series and movies in the background while coding was draining my focus and creativity.  
-> This insight inspired me to build a tool—for myself and others—to stay focused with relaxing ambient music.
+## Project structure
 
----
-
-
-## Guide
-
-This guide helps you **set up**, **build**, **test**, and **contribute** to the Ambient Music AutoPlayer extension for Visual Studio Code.
-
----
-
-## 📁 Project Structure
-
-```
+```text
 ambient-music-vs-extension/
-├── .vscode/               # Debug configs for dev mode
-├── dist/                  # Compiled JS output (built via TypeScript)
-├── media/                 # YouTube HTML player
-├── src/                   # Main TypeScript source code
-│   ├── extension.ts       # Entry point (activate/deactivate)
-│   ├── commands.ts        # VS Code command registration
-│   ├── playlist.ts        # Playlist management
-│   ├── serverManager.ts   # Singleton HTTP server
-│   ├── webSocketManager.ts# Singleton WebSocket logic
-│   └── utils/             # Helper functions (browser, config, logger)
-├── test/                  # Mocha-based test suite
-├── package.json           # VS Code extension manifest
-├── tsconfig.json          # TypeScript configuration
-└── README.md              # End-user instructions
+├── .github/workflows/       # Test, version, tag, and release automation
+├── .vscode/                 # Extension Development Host launch config
+├── media/                   # Player HTML, default playlist, and extension icons
+├── scripts/                 # VSIX packaging and local installation
+├── src/
+│   ├── extension.ts         # Activation and deactivation
+│   ├── commands.ts          # Command Palette registration
+│   ├── sidebarController.ts # Activity Bar webview
+│   ├── filters/             # Playlist filtering
+│   ├── interfaces/          # Playlist type definitions
+│   ├── server/              # HTTP routes and WebSocket handlers
+│   ├── services/            # File, playlist, server, and WebSocket services
+│   ├── utils/               # Browser, configuration, logging, URL, and tab helpers
+│   └── validators/          # Playlist validation
+├── test/                    # Mocha and VS Code Electron tests
+├── package.json             # Extension manifest and scripts
+├── tsconfig.json            # TypeScript options
+├── tsup.config.ts           # Build and bundle configuration
+└── README.md                # End-user documentation
 ```
 
----
+## Development setup
 
-## 🚀 Getting Started (Dev Setup)
+Requirements:
 
-### 1. Clone the Repository
+- Node.js 22 or later
+- pnpm 10.15 or later
+- VS Code 1.80 or later
+- Google Chrome
+
+From the repository root:
 
 ```bash
-git clone https://github.com/taj54/ambient-music-vs-extension.git
-cd ambient-music-vs-extension
+corepack enable
+corepack pnpm install
+pnpm run compile
 ```
 
-### 2. Install Dependencies
+Press `F5` in VS Code or use **Run > Start Debugging** to launch the extension in the Extension Development Host.
 
-```bash
-npm install
-```
+## How it works
 
-### 3. Build the Extension
+- `src/extension.ts` initializes the playlist and services, registers commands, and adds the sidebar view.
+- `src/services/serverManager.ts` starts the local HTTP/WebSocket server and manages the primary VS Code instance.
+- `src/services/webSocketManager.ts` synchronizes playback status and sends commands between VS Code and the browser.
+- `src/services/playlistManager.ts` loads the default or configured playlist and manages track selection.
+- `src/sidebarController.ts` renders the Activity Bar controller and forwards sidebar actions.
+- `media/client.html` embeds and controls the YouTube player.
+- `src/utils/browser.ts` opens Chrome in an app-style, incognito window.
 
-```bash
-npm run compile
-```
+Only the primary VS Code window starts the server. Other windows connect to the running server through the lock file in the operating-system temporary directory.
 
-### 4. Launch in Dev Mode
+## Commands
 
-- Open the project in VS Code
-- Press `F5` to start a new Extension Development Host
+| Command ID | Title | Purpose |
+| --- | --- | --- |
+| `ambientMusic.openTab` | Open Ambient Music Player | Starts or opens the player window |
+| `ambientMusic.play` | Play Ambient Music | Starts playback |
+| `ambientMusic.pause` | Pause Music | Pauses playback |
+| `ambientMusic.resume` | Resume Music | Resumes playback |
+| `ambientMusic.setPlaylist` | Set Playlist | Filters the playlist by a tag |
+| `ambientMusic.resetPlaylist` | Reset Playlist to Default | Restores the default playlist |
+| `ambientMusic.closeTab` | Close Music Player | Closes the browser player and stops owned server resources |
 
-Expected:
-- Ambient YouTube music auto-launches in a browser tab
-- WebSocket connects and displays confirmation
+## Settings
 
----
+| Setting | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `ambientMusic.autoPlayOnStartup` | `boolean` | `true` | Start ambient music after activation |
+| `ambientMusic.port` | `number` | `3303` | Preferred local server port; `0` requests an available port |
+| `ambientMusic.switchIntervalMinutes` | `number` | `30` | Minutes between automatic track changes |
+| `ambientMusic.debug` | `boolean` | `false` | Enable verbose extension logging |
+| `ambientMusic.playlist` | `array` | `[]` | Replace the default playlist |
 
-## 🧠 How It Works
-
-- The extension spins up a local HTTP server that serves a YouTube-based HTML client (`media/client.html`)
-- A WebSocket connection allows the extension to send commands (play, pause, switch track, close tab)
-- Music auto-plays when VS Code opens a workspace
-- Track rotation happens every X minutes (default 30)
-
----
-
-## ⚙️ Key Components
-
-| Component | Responsibility |
-|----------|----------------|
-| `serverManager.ts` | HTTP server with singleton pattern |
-| `webSocketManager.ts` | WebSocket communication (client commands + rotation) |
-| `playlist.ts` | Load/parse/manage YouTube video playlist |
-| `browser.ts` | Open/close browser tabs (Chrome) |
-| `extension.ts` | Entry point – activates server, WebSocket, commands |
-| `commands.ts` | Exposes VS Code command palette actions |
-
----
-
-## 🎯 Commands (Dev or Test)
-Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and search for:
-
-
-| Command ID                      | Title                                                  | Description                            |
-|--------------------------------|---------------------------------------------------------|----------------------------------------|
-| `ambientMusic.setPlaylist`     | 🎶 Set Playlist (Rain, Forest, Ocean...)               | Choose or define a relaxing playlist   |
-| `ambientMusic.openTab`         | 🌐 Open Ambient Music Player                            | Opens the embedded music player tab    |
-| `ambientMusic.play`            | ▶️ Play Ambient Music                                   | Starts playing ambient music           |
-| `ambientMusic.pause`           | ⏸️ Pause Music                                          | Pauses the currently playing track     |
-| `ambientMusic.resume`          | ⏯ Resume Music                                          | Resumes paused ambient music           |
-| `ambientMusic.closeTab`        | ❌ Close Music Player                                   | Closes the music player tab            |
-| `ambientMusic.resetPlaylist`   | 🔄 Reset Playlist to Default                            | Restores the default ambient playlist  |
-
-
----
-> 💡 **Tip:** You can customize keybindings for these commands or use them in your automation workflows inside VS Code.
-
----
-
-## 🔧 Configuration (Optional)
-
-These settings can be customized in your VS Code `settings.json`.
-
-
-| Setting Key                                | Type      | Default | Description                                                                                      |
-|-------------------------------------------|-----------|---------|--------------------------------------------------------------------------------------------------|
-| `ambientMusic.autoPlayOnStartup`          | `boolean` | `true` | Automatically start ambient music when VS Code launches.                                         |
-| `ambientMusic.port`                       | `number`  | `3303`  | Port for the WebSocket server. Set to `0` for dynamic port allocation.                          |
-| `ambientMusic.switchIntervalMinutes`      | `number`  | `30`    | Time interval (in minutes) to automatically switch to the next video in the playlist.           |
-| `ambientMusic.debug`                      | `boolean` | `false` | Enables verbose debug logging for easier troubleshooting.                                        |
-| `ambientMusic.playlist`                   | `array`   | `[]`    | Custom list of ambient YouTube videos with rich metadata. See example below.                    |
-
-### 🎵 Playlist Format Example
+Custom playlist URLs must use the YouTube watch format:
 
 ```json
 {
-  "title": "Peaceful Piano",
-  "url": "https://youtu.be/abc123",
-  "tags": ["piano", "relax"],
-  "channel": {
-    "name": "Chill Music Co.",
-    "url": "https://youtube.com/@chillmusicco"
-  }
+  "ambientMusic.playlist": [
+    {
+      "title": "Peaceful Piano",
+      "url": "https://www.youtube.com/watch?v=abcdefghijkl",
+      "tags": ["piano", "relax"],
+      "channel": {
+        "name": "Chill Music Co.",
+        "url": "https://youtube.com/@chillmusicco"
+      }
+    }
+  ]
 }
-
 ```
 
-> ℹ️ Use these to personalize your flow.
+The playlist validator requires a title, an 11-character YouTube video ID in the watch URL, a string tag array, and channel name/URL fields.
 
----
+## Testing
 
-## 🌀 Rotation Logic
-
-The extension will auto-switch to the next track based on:
-
-```ts
-startRotation(clientUrl, intervalMinutes);
-```
-
----
-
-## 📦 Packaging the Extension
+Run the Mocha suite and VS Code Electron test runner:
 
 ```bash
-npm install -g vsce
-vsce package
+pnpm test
 ```
 
-You’ll get a `.vsix` file that can be installed or published to the VS Code Marketplace.
+The test command first compiles the extension and test entry points with `tsup`, then launches VS Code in test mode.
 
----
+On Linux CI, use Xvfb:
 
-## 🧪 Testing
+```bash
+xvfb-run -a pnpm test
+```
 
-- Run `npm run test` (uses `@vscode/test-electron`)
-- Watch WebSocket & HTTP logs in VS Code terminal
-- Debug client with DevTools → right-click → Inspect on the player tab
+Use the test runner and Extension Development Host to verify browser, WebSocket, sidebar, and playlist behavior end to end.
 
----
+## Building and packaging
 
-## 🖥️ Lockfile Behavior
+Compile the extension:
 
-To prevent multiple instances, a `.ambient-music-extension.lock` file is created at runtime.
-On extension deactivate or VS Code close, this lock is removed. 
+```bash
+pnpm run compile
+```
 
----
+Create a VSIX package:
 
-## 📌 Requirements
+```bash
+pnpm run package:vsix
+```
 
-- Node.js v18+
-- VS Code v1.80+
-- Chrome installed (for tab open/close logic)
+Package and install it into the local VS Code installation:
 
----
+```bash
+pnpm run install:local
+```
 
-## 🙌 Contributing
+The VSIX filename is `ambient-music-vs-extension-<version>.vsix`.
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md)
+## Instance locking
 
----
+The server manager creates `<os-temporary-directory>/ambient-music-extension.lock` for the primary instance. The file contains the process ID and active server port.
 
+- A running server makes the lock usable by secondary VS Code windows.
+- A stale or invalid lock is removed.
+- The primary window owns shutdown and lock cleanup.
+
+## Contribution workflow
+
+1. Fork and clone the repository.
+2. Install dependencies with pnpm.
+3. Make focused changes and add or update tests.
+4. Run `pnpm run compile` and `pnpm test`.
+5. Open a pull request with a clear summary and testing notes.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the project-specific contribution guide and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community standards.
