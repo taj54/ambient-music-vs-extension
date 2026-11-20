@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="84 44 340 340" width="24" height="24">
   <defs>
     <!-- Negative-space mask creating the exact gap around the musical note -->
     <mask id="note-cutout">
-      <rect width="512" height="512" fill="white" />
+      <rect x="84" y="44" width="340" height="340" fill="white" />
       <!-- Clearance around the note head -->
       <ellipse cx="303" cy="197" rx="34" ry="29.5" transform="rotate(-18 303 197)" fill="black" />
       <!-- Clearance around the vertical stem -->
