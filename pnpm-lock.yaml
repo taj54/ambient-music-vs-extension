@@ -10,7 +10,7 @@ importers:
     dependencies:
       ws:
         specifier: 8.23.0
-        version: 8.23.0(bufferutil@4.2.0)(utf-8-validate@5.0.10)
+        version: 8.23.0(bufferutil@4.2.0)(utf-8-validate@6.1.0)
     devDependencies:
       '@types/chai':
         specifier: ^5.2.2
@@ -65,8 +65,8 @@ importers:
         specifier: 4.2.0
         version: 4.2.0
       utf-8-validate:
-        specifier: 5.0.10
-        version: 5.0.10
+        specifier: 6.1.0
+        version: 6.1.0
 
 packages:
 
@@ -1693,8 +1693,8 @@ packages:
   url-join@4.0.1:
     resolution: {integrity: sha512-jk1+QP6ZJqyOiuEI9AEWQfju/nB2Pw466kbA0LEZljHwKeMgd9WrAEgEGxjPDD2+TNbbb37rTyhEfrCXfuKXnA==}
 
-  utf-8-validate@5.0.10:
-    resolution: {integrity: sha512-Z6czzLq4u8fPOyx7TU6X3dvUZVvoJmxSQ+IcrlmagKhilxlhZgxPK6C5Jqbkw1IDUmFTM+cz9QDnnLTwDz/2gQ==}
+  utf-8-validate@6.1.0:
+    resolution: {integrity: sha512-+VqK0s7hdUuvL95ExzfqCqvsuA2A+3KzNYibPeeDnGU9L5onk8CY5/H30kCHLpVMzEh6HV9Dv8uw+E+Mz4X/dA==}
     engines: {node: '>=6.14.2'}
 
   util-deprecate@1.0.2:
@@ -3304,7 +3304,7 @@ snapshots:
 
   url-join@4.0.1: {}
 
-  utf-8-validate@5.0.10:
+  utf-8-validate@6.1.0:
     dependencies:
       node-gyp-build: 4.8.4
     optional: true
@@ -3344,10 +3344,10 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  ws@8.23.0(bufferutil@4.2.0)(utf-8-validate@5.0.10):
+  ws@8.23.0(bufferutil@4.2.0)(utf-8-validate@6.1.0):
     optionalDependencies:
       bufferutil: 4.2.0
-      utf-8-validate: 5.0.10
+      utf-8-validate: 6.1.0
 
   wsl-utils@1.0.1:
     dependencies:
