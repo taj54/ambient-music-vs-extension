@@ -131,7 +131,7 @@
     "watch": "pnpm exec tsup --watch",
     "test": "pnpm run compile && node ./dist/test/runTest.js"
   },
-  "packageManager": "pnpm@10.34.9",
+  "packageManager": "pnpm@12.23.0",
   "devDependencies": {
     "@types/chai": "^5.2.2",
     "@types/glob": "^8.1.0",
