@@ -140,7 +140,7 @@
     "@types/sinon": "^17.0.4",
     "@types/vscode": "^1.80.0",
     "@types/ws": "^8.18.1",
-    "@vscode/test-electron": "^2.5.2",
+    "@vscode/test-electron": "^3.0.0",
     "@vscode/vsce": "^4.0.0",
     "chai": "^5.2.0",
     "glob": "^11.0.3",
