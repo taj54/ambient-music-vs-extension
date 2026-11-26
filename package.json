@@ -147,7 +147,7 @@
     "mocha": "^11.7.1",
     "sinon": "^21.0.0",
     "ts-node": "^10.9.2",
-    "tsup": "^8.5.0",
+    "tsup": "^9.0.0",
     "vscode-test": "^1.6.1"
   },
   "dependencies": {
