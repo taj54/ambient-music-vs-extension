@@ -151,7 +151,7 @@
     "vscode-test": "^1.6.1"
   },
   "dependencies": {
-    "ws": "8.11.0"
+    "ws": "8.23.0"
   },
   "optionalDependencies": {
     "bufferutil": "4.2.0",
