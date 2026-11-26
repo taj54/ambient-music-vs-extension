@@ -1,14 +1,19 @@
-
 name: Release
 
-on: 
+on:
   release:
-    types: [created]
+    types: [published]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -19,17 +24,17 @@ jobs:
           version: 10.15.0
           run_install: false
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
-
 
       - name: Compile extension
         run: pnpm run compile
 
       - name: Publish to VS Code Marketplace
-        uses: HaaLeo/publish-vscode-extension@v2
-        with:
-          pat: ${{ secrets.VSCE_PAT }}
-          registryUrl: https://marketplace.visualstudio.com
-          dependencies: false
-          skipDuplicate: true
+        run: pnpm dlx @vscode/vsce publish --oidc --no-dependencies --skip-duplicate
