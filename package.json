@@ -134,7 +134,7 @@
   "packageManager": "pnpm@10.34.9",
   "devDependencies": {
     "@types/chai": "^5.2.2",
-    "@types/glob": "^8.1.0",
+    "@types/glob": "^9.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "^26.0.0",
     "@types/sinon": "^17.0.4",
