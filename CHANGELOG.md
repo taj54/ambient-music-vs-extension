@@ -4,6 +4,16 @@ All notable changes for each version of the Ambient Music extension.
 
 ---
 
+## v2.4.0 2026-11-27
+
+### Changed
+
+- minor update to patch
+
+### Fixed
+
+- resolve env context warning and YAML indentation in release workflow
+
 ## v2.3.0 2026-11-27
 
 ### Added
