@@ -28,6 +28,14 @@ jobs:
           node-version: '26'
           cache: 'pnpm'
 
+      - name: Debug pnpm workspace & config
+        run: |
+          pwd
+          pnpm --version
+          ls -la
+          cat pnpm-workspace.yaml || true
+          pnpm config list
+
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
