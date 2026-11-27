@@ -1,6 +1,7 @@
 onlyBuiltDependencies:
   - "@vscode/vsce-sign"
   - "bufferutil"
+  - "esbuild"
   - "utf-8-validate"
 minimumReleaseAgeExclude:
   - "@types/node@26.6.11"
