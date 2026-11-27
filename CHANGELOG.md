@@ -4,6 +4,86 @@ All notable changes for each version of the Ambient Music extension.
 
 ---
 
+## v2.3.0 2026-11-27
+
+### Added
+
+- bump version to 2.2.3 and enhance browser window management
+- enhance YouTube player controls and update browser launch options
+
+### Changed
+
+- remove deprecated @types/glob and vscode-test devDependencies
+- Merge pull request #47 from taj54/renovate/pnpm-12.x
+- use allowBuilds in pnpm-workspace.yaml for pnpm 12
+- test
+- configure onlyBuiltDependencies in pnpm-workspace.yaml
+- allow build script for esbuild
+- allow build scripts for vsce-sign and ws native add-ons
+- Build allowed
+- update pnpm to v12
+- exclude recently published packages from minimumReleaseAge
+- Merge pull request #40 from taj54/renovate/sinon-22.x
+- update dependency sinon to v22
+- Merge pull request #38 from taj54/renovate/mocha-12.x
+- Merge pull request #42 from taj54/renovate/utf-8-validate-6.x
+- update dependency mocha to v12
+- Merge pull request #37 from taj54/renovate/glob-14.x
+- Merge pull request #41 from taj54/renovate/tsup-9.x
+- update dependency glob to v14
+- Merge pull request #36 from taj54/renovate/chai-6.x
+- Merge pull request #34 from taj54/renovate/vscode-test-electron-3.x
+- Merge pull request #33 from taj54/renovate/glob-9.x
+- update dependency tsup to v9
+- update dependency chai to v6
+- update dependency @vscode/test-electron to v3
+- Merge pull request #35 from taj54/renovate/vscode-vsce-4.x
+- update dependency utf-8-validate to v6
+- Merge pull request #30 from taj54/renovate/ws-8.x
+- Merge pull request #29 from taj54/renovate/pnpm-10.x
+- update dependency @vscode/vsce to v4
+- Merge pull request #45 from taj54/renovate/softprops-action-gh-release-3.x
+- Merge pull request #27 from taj54/renovate/mocha-11.x-lockfile
+- Merge pull request #32 from taj54/renovate/actions-setup-node-7.x
+- Merge pull request #28 from taj54/renovate/sinon-21.x-lockfile
+- Merge pull request #31 from taj54/renovate/actions-checkout-7.x
+- update dependency mocha to v11.8.0
+- Merge pull request #24 from taj54/renovate/vscode-vsce-3.x-lockfile
+- update dependency @vscode/vsce to v3.9.2
+- Merge pull request #44 from taj54/renovate/pnpm-action-setup-6.x
+- Merge pull request #26 from taj54/renovate/glob-11.x-lockfile
+- update dependency @types/glob to v9
+- Merge pull request #39 from taj54/renovate/node-26.x
+- update dependency node to v26
+- update dependency glob to v11.1.0
+- Merge pull request #46 from taj54/renovate/taj54-universal-version-bump-1.x
+- Merge pull request #25 from taj54/renovate/bufferutil-4.x
+- update taj54/universal-version-bump action to v1
+- update softprops/action-gh-release action to v3
+- update pnpm/action-setup action to v6
+- Merge pull request #23 from taj54/renovate/vscode-1.x-lockfile
+- update actions/setup-node action to v7
+- Merge pull request #22 from taj54/renovate/node-24.x-lockfile
+- update actions/checkout action to v7
+- update pnpm to v10.34.9
+- update dependency sinon to v21.1.2
+- Merge pull request #21 from taj54/renovate/tsup-8.x-lockfile
+- update dependency bufferutil to v4.2.0
+- update dependency @types/vscode to v1.146.0
+- update dependency @types/node to v24.19.4
+- update dependency tsup to v8.5.1
+- Merge pull request #19 from taj54/renovate/ws-8.x-lockfile
+- Merge pull request #18 from taj54/renovate/chai-5.x-lockfile
+- update dependency @types/ws to v8.18.2
+- update dependency @types/chai to v5.2.3
+- Merge pull request #17 from taj54/renovate/configure
+- Add renovate.json
+- migrate VS Code Marketplace publishing to OIDC Trusted Publishing
+
+### Fixed
+
+- update dependency ws to v8.23.0
+
 ## v2.2.0 2026-11-20
 
 ### Added
