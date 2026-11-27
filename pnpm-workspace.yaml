@@ -1,5 +1,7 @@
-allowBuilds:
-  esbuild: true
+onlyBuiltDependencies:
+  - "@vscode/vsce-sign"
+  - "bufferutil"
+  - "utf-8-validate"
 minimumReleaseAgeExclude:
   - "@types/node@26.6.11"
   - "string_decoder@1.4.0"
