@@ -149,7 +149,7 @@
     "tsup": "^9.0.0"
   },
   "dependencies": {
-    "ws": "8.23.0"
+    "ws": "8.23.1"
   },
   "optionalDependencies": {
     "bufferutil": "4.2.0",
